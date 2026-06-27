@@ -1,15 +1,28 @@
-# Node modules
+# ================================
+# Node.js — dependências
+# ================================
 node_modules/
+**/node_modules/
 
-# Environment variables (private credentials)
+# ================================
+# Variáveis de ambiente (credenciais)
+# ================================
 .env
+**/.env
 
-# Local uploads (receipts, profile pics, and user files)
+# ================================
+# Uploads (ficheiros de utilizadores)
+# ================================
 uploads/*
 !uploads/.gitkeep
+api/uploads/*
+!api/uploads/.gitkeep
 
-# IDE configs and OS metadata
+# ================================
+# OS e IDE
+# ================================
 .vscode/
 .idea/
 Thumbs.db
 Desktop.ini
+*.log
