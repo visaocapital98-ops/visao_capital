@@ -1,0 +1,15 @@
+# Node modules
+node_modules/
+
+# Environment variables (private credentials)
+.env
+
+# Local uploads (receipts, profile pics, and user files)
+uploads/*
+!uploads/.gitkeep
+
+# IDE configs and OS metadata
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
