@@ -1542,7 +1542,7 @@ async function renderAffiliateDashboard() {
     `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--cinza);">Nenhum levantamento ainda</td></tr>';
 
     document.getElementById('af_profile_info').innerHTML = `
-      ${af.foto_path ? `<div style="text-align:center;margin-bottom:16px;"><img src="${af.foto_path}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid var(--verde-claro);"/></div>` : ''}
+      ${af.foto_path ? `<div style="text-align:center;margin-bottom:16px;"><img src="${API_BASE}${af.foto_path}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid var(--verde-claro);"/></div>` : ''}
       <div class="setting-row"><span class="setting-label">Nome</span><span class="setting-val">${af.nome}</span></div>
       <div class="setting-row"><span class="setting-label">Email</span><span class="setting-val">${af.email}</span></div>
       <div class="setting-row"><span class="setting-label">Telefone</span><span class="setting-val">${af.tel}</span></div>
@@ -1785,8 +1785,8 @@ function viewComprovativo(id) {
     <h3>🧾 Comprovativo de Pagamento</h3>
     <p style="color:var(--cinza);font-size:.85rem;margin-bottom:12px;">Pedido: <strong>${o.id}</strong> | Cliente: <strong>${o.cliente}</strong></p>
     ${isImg
-      ? `<img src="${o.comprovativo_path}" style="width:100%;max-height:400px;object-fit:contain;border-radius:8px;border:1px solid #ddd;"/>`
-      : `<div style="text-align:center;padding:24px;"><p style="margin-bottom:12px;">📄 ${o.comprovativo_name || 'comprovativo.pdf'}</p><a href="${o.comprovativo_path}" download="${o.comprovativo_name || 'comprovativo'}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;display:inline-block;">📥 Abrir / Descarregar</a></div>`
+      ? `<img src="${API_BASE}${o.comprovativo_path}" style="width:100%;max-height:400px;object-fit:contain;border-radius:8px;border:1px solid #ddd;"/>`
+      : `<div style="text-align:center;padding:24px;"><p style="margin-bottom:12px;">📄 ${o.comprovativo_name || 'comprovativo.pdf'}</p><a href="${API_BASE}${o.comprovativo_path}" download="${o.comprovativo_name || 'comprovativo'}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;display:inline-block;">📥 Abrir / Descarregar</a></div>`
     }
     <div class="modal-btns"><button class="btn-confirm" onclick="closeModal()">Fechar</button></div>
   `);
@@ -1807,7 +1807,7 @@ async function viewFicheiros(id) {
           const isImg = isImage(f.file_path);
           return `<div style="border:1px solid #ddd;border-radius:8px;padding:10px;">
             <div style="font-weight:600;margin-bottom:6px;">📄 ${f.file_name || 'Ficheiro ' + (i + 1)}</div>
-            ${isImg ? `<img src="${f.file_path}" style="max-width:100%;border-radius:6px;"/>` : `<a href="${f.file_path}" download="${f.file_name}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:8px 16px;border-radius:6px;font-weight:600;display:inline-block;">📥 Descarregar</a>`}
+            ${isImg ? `<img src="${API_BASE}${f.file_path}" style="max-width:100%;border-radius:6px;"/>` : `<a href="${API_BASE}${f.file_path}" download="${f.file_name}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:8px 16px;border-radius:6px;font-weight:600;display:inline-block;">📥 Descarregar</a>`}
           </div>`;
         }).join('')}
       </div>
@@ -1944,7 +1944,7 @@ async function renderAffiliates() {
 
     document.getElementById('adm_affiliates_table').innerHTML = filtered.map(a => `
       <tr>
-        <td><div style="display:flex;align-items:center;gap:8px;">${a.foto_path ? `<img src="${a.foto_path}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--verde-claro);"/>` : `<div style="width:36px;height:36px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">${a.nome[0]}</div>`}<strong>${a.nome}</strong></div></td>
+        <td><div style="display:flex;align-items:center;gap:8px;">${a.foto_path ? `<img src="${API_BASE}${a.foto_path}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--verde-claro);"/>` : `<div style="width:36px;height:36px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">${a.nome[0]}</div>`}<strong>${a.nome}</strong></div></td>
         <td><span class="badge badge-blue" style="font-family:monospace;">${a.code}</span></td>
         <td>${a.email}</td><td>${a.tel}</td><td>${new Date(a.date_joined).toLocaleDateString('pt-PT')}</td>
         <td>${a.totalSales || 0}</td>
@@ -1968,7 +1968,7 @@ function viewAffiliateModal(id) {
   openModal(`
     <h3>👤 Detalhes do Afiliado</h3>
     <div style="text-align:center;margin-bottom:16px;">
-      ${a.foto_path ? `<img src="${a.foto_path}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:4px solid var(--verde-claro);"/>` : `<div style="width:90px;height:90px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;margin:0 auto;">${a.nome[0]}</div>`}
+      ${a.foto_path ? `<img src="${API_BASE}${a.foto_path}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:4px solid var(--verde-claro);"/>` : `<div style="width:90px;height:90px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;margin:0 auto;">${a.nome[0]}</div>`}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.9rem;">
       <div><strong>Nome:</strong><br/>${a.nome}</div>
