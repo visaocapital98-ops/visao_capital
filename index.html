@@ -658,6 +658,7 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
         <a href="javascript:void(0)" class="active" onclick="showAfTab('af-overview')" id="af-menu-overview"><span class="icon">📊</span> Visão Geral</a>
         <a href="javascript:void(0)" onclick="showAfTab('af-sales')" id="af-menu-sales"><span class="icon">🛒</span> Minhas Vendas</a>
         <a href="javascript:void(0)" onclick="showAfTab('af-commission')" id="af-menu-commission"><span class="icon">💰</span> Comissões</a>
+        <a href="javascript:void(0)" onclick="showAfTab('af-notifications')" id="af-menu-notifications"><span class="icon">🔔</span> Notificações <span id="af_notif_badge" style="display:none;background:#ff4d4d;color:#fff;border-radius:10px;padding:2px 6px;font-size:0.7rem;font-weight:700;margin-left:5px;">0</span></a>
         <a href="javascript:void(0)" onclick="showAfTab('af-profile')" id="af-menu-profile"><span class="icon">👤</span> Meu Perfil</a>
         <a href="javascript:void(0)" onclick="logoutAffiliate()" style="margin-top:auto;color:#ff6b6b;"><span class="icon">🚪</span> Sair</a>
       </div>
@@ -747,6 +748,14 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
           <h3>Informações Pessoais</h3>
           <div id="af_profile_info"></div>
           <button class="submit-btn" onclick="showEditProfileModal()" style="margin-top:16px;max-width:200px;">✏️ Editar Perfil</button>
+        </div>
+      </div>
+      <!-- NOTIFICATIONS -->
+      <div class="tab-panel" id="af-notifications">
+        <div class="panel-header"><h2>Notificações</h2><p>Promoções, novidades, ofertas e novos produtos</p></div>
+        <div class="table-container">
+          <div class="table-header"><h3>Mensagens do Sistema</h3></div>
+          <div id="af_notifications_list" style="display:flex;flex-direction:column;gap:12px;padding:16px;"></div>
         </div>
       </div>
     </div>
@@ -876,6 +885,11 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
           <div class="table-header"><h3>Lista de Afiliados</h3></div>
           <div style="overflow-x:auto;"><table><thead><tr><th>Nome</th><th>Código</th><th>Email</th><th>Tel.</th><th>Data Registo</th><th>Vendas</th><th>Comissão</th><th>Estado</th><th>Ações</th></tr></thead>
           <tbody id="adm_affiliates_table"></tbody></table></div>
+        </div>
+        <div class="table-container" style="margin-top:24px;">
+          <div class="table-header"><h3>🏆 Ranking dos Melhores Afiliados</h3></div>
+          <div style="overflow-x:auto;"><table><thead><tr><th>Posição</th><th>Afiliado</th><th>Código</th><th>Clientes Pagos</th><th>Total Faturado</th><th>Comissão Acumulada</th></tr></thead>
+          <tbody id="adm_affiliates_ranking_table"></tbody></table></div>
         </div>
       </div>
 
@@ -1510,8 +1524,11 @@ function showAfTab(tab) {
   if (mItem) mItem.classList.add('active');
   
   currentAfTab = tab;
+  
+  if (tab === 'af-notifications') {
+    loadAffiliateNotifications();
+  }
 }
-
 async function renderAffiliateDashboard() {
   const token = Auth.getAffiliateToken();
   if (!token) {
@@ -1587,6 +1604,7 @@ async function renderAffiliateDashboard() {
       <div class="setting-row"><span class="setting-label">Titular</span><span class="setting-val">${af.banco_titular || 'N/A'}</span></div>
       <div class="setting-row"><span class="setting-label">PayPay</span><span class="setting-val">${af.paypay || 'N/A'}</span></div>
     `;
+    loadAffiliateNotifications();
   } catch (e) {
     showToast('Erro ao carregar o dashboard', 'error');
   }
@@ -2087,6 +2105,16 @@ async function renderAffiliates() {
         </td>
       </tr>
     `).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--cinza);padding:20px;">Nenhum afiliado registado</td></tr>';
+    
+    // Popular o dropdown de destinatários nas notificações
+    const destSel = document.getElementById('notif_destinatario');
+    if (destSel) {
+      destSel.innerHTML = '<option value="todos">Todos os Afiliados</option>' + 
+        afs.map(a => `<option value="${a.id}">${a.nome} (${a.code})</option>`).join('');
+    }
+
+    // Renderizar o ranking dos melhores afiliados
+    renderAffiliateRanking();
   } catch (e) {
     showToast('Erro ao carregar afiliados', 'error');
   }
@@ -2098,7 +2126,10 @@ function viewAffiliateModal(id) {
   openModal(`
     <h3>👤 Detalhes do Afiliado</h3>
     <div style="text-align:center;margin-bottom:16px;">
-      ${a.foto_path ? `<img src="${API_BASE}${a.foto_path}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:4px solid var(--verde-claro);"/>` : `<div style="width:90px;height:90px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;margin:0 auto;">${a.nome[0]}</div>`}
+      ${a.foto_path ? `
+        <img src="${API_BASE}${a.foto_path}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:4px solid var(--verde-claro);"/><br/>
+        <a href="javascript:void(0)" onclick="downloadAffiliatePhoto('${API_BASE}${a.foto_path}', '${a.nome.replace(/\s+/g,'_')}_foto.jpg')" style="font-size:0.85rem;color:var(--verde-escuro);text-decoration:underline;font-weight:600;display:inline-block;margin-top:5px;">📥 Descarregar Foto</a>
+      ` : `<div style="width:90px;height:90px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:2rem;margin:0 auto;">${a.nome[0]}</div>`}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.9rem;">
       <div><strong>Nome:</strong><br/>${a.nome}</div>
@@ -2575,7 +2606,12 @@ async function updateCommission() {
 }
 
 async function sendNotification() {
+  const titulo = document.getElementById('notif_title').value.trim();
+  const tipo = document.getElementById('notif_type').value;
+  const destinatario = document.getElementById('notif_destinatario').value;
   const msg = document.getElementById('notif_message').value.trim();
+  
+  if (!titulo) { showToast('Escreva um título para a notificação', 'error'); return; }
   if (!msg) { showToast('Escreva uma mensagem', 'error'); return; }
 
   try {
@@ -2585,13 +2621,14 @@ async function sendNotification() {
         'Content-Type': 'application/json',
         ...Auth.getHeaders(true)
       },
-      body: JSON.stringify({ message: msg })
+      body: JSON.stringify({ titulo, tipo, destinatario, message: msg })
     });
     const data = await res.json();
     if (data.error) { showToast(data.error, 'error'); return; }
 
+    document.getElementById('notif_title').value = '';
     document.getElementById('notif_message').value = '';
-    showToast('Notificação enviada a todos os afiliados!', 'success');
+    showToast('Notificação enviada com sucesso!', 'success');
   } catch (e) {
     showToast('Erro ao enviar notificação', 'error');
   }
@@ -2675,6 +2712,150 @@ async function initApp() {
     } catch (e) {
       console.warn('Erro ao restaurar sessão de afiliado', e);
     }
+  }
+}
+
+// Descarregar foto do afiliado
+async function downloadAffiliatePhoto(url, filename) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename || 'foto_perfil.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(blobUrl);
+    showToast('Download da foto iniciado!');
+  } catch (e) {
+    window.open(url, '_blank');
+  }
+}
+
+// Renderizar ranking de afiliados no painel admin
+async function renderAffiliateRanking() {
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/affiliates/ranking`, {
+      headers: Auth.getHeaders(true)
+    });
+    const ranking = await res.json();
+    
+    document.getElementById('adm_affiliates_ranking_table').innerHTML = ranking.map((a, i) => {
+      let positionBadge = '';
+      if (i === 0) positionBadge = '🥇';
+      else if (i === 1) positionBadge = '🥈';
+      else if (i === 2) positionBadge = '🥉';
+      else positionBadge = `#${i + 1}`;
+
+      return `
+        <tr>
+          <td><strong style="font-size:1.1rem;">${positionBadge}</strong></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              ${a.foto_path ? `<img src="${API_BASE}${a.foto_path}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;"/>` : `<div style="width:30px;height:30px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;">${a.nome[0]}</div>`}
+              <strong>${a.nome}</strong>
+            </div>
+          </td>
+          <td><span class="badge badge-blue" style="font-family:monospace;">${a.code}</span></td>
+          <td><strong>${a.totalSales}</strong></td>
+          <td>${fmt(a.totalRevenue || 0)} Kz</td>
+          <td><strong style="color:var(--verde-escuro);">${fmt(a.commission || 0)} Kz</strong></td>
+        </tr>
+      `;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--cinza);padding:20px;">Nenhum ranking disponível</td></tr>';
+  } catch (e) {
+    console.error('Erro ao carregar ranking:', e);
+  }
+}
+
+// Carregar notificações do afiliado no dashboard
+async function loadAffiliateNotifications() {
+  try {
+    const res = await fetch(`${API_BASE}/api/affiliates/notifications`, {
+      headers: Auth.getHeaders()
+    });
+    const notifs = await res.json();
+    
+    // Contar não lidas
+    const unreadCount = notifs.filter(n => !n.lida).length;
+    const badge = document.getElementById('af_notif_badge');
+    if (badge) {
+      if (unreadCount > 0) {
+        badge.textContent = unreadCount;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    const typeIcons = {
+      promocao: '🎉',
+      novidade: '🆕',
+      oferta: '🎁',
+      produto: '📦',
+      geral: '🔔'
+    };
+    
+    const typeStyles = {
+      promocao: 'background:#fff8e1;border-left:4px solid #ffb300;',
+      novidade: 'background:#e3f2fd;border-left:4px solid #1e88e5;',
+      oferta: 'background:#fce4ec;border-left:4px solid #d81b60;',
+      produto: 'background:#efebe9;border-left:4px solid #6d4c41;',
+      geral: 'background:#f5f5f5;border-left:4px solid #757575;'
+    };
+
+    const typeLabels = {
+      promocao: 'Promoção',
+      novidade: 'Novidade',
+      oferta: 'Oferta',
+      produto: 'Novo Produto',
+      geral: 'Geral'
+    };
+
+    const listContainer = document.getElementById('af_notifications_list');
+    if (listContainer) {
+      listContainer.innerHTML = notifs.map(n => {
+        const icon = typeIcons[n.tipo] || '🔔';
+        const style = typeStyles[n.tipo] || 'background:#f5f5f5;border-left:4px solid #757575;';
+        const label = typeLabels[n.tipo] || 'Geral';
+        
+        return `
+          <div style="border-radius:8px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.05);position:relative;${style}">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:#555;">${icon} ${label}</span>
+              <span style="font-size:0.75rem;color:var(--cinza);">${new Date(n.date).toLocaleDateString('pt-PT')}</span>
+            </div>
+            <h4 style="margin:4px 0 8px 0;color:#333;">${n.titulo}</h4>
+            <p style="margin:0;font-size:0.9rem;color:#555;line-height:1.4;">${n.message}</p>
+            ${!n.lida ? `
+              <button onclick="readNotification('${n.id}')" style="margin-top:10px;background:var(--verde-escuro);color:#fff;border:none;padding:4px 10px;border-radius:4px;font-size:0.75rem;cursor:pointer;font-weight:600;">
+                ✓ Marcar como lida
+              </button>
+              <span class="unread-dot" style="position:absolute;top:10px;right:10px;width:8px;height:8px;background:red;border-radius:50%;"></span>
+            ` : ''}
+          </div>
+        `;
+      }).join('') || '<div style="text-align:center;color:var(--cinza);padding:24px;">Nenhuma notificação recebida</div>';
+    }
+  } catch (e) {
+    console.error('Erro ao carregar notificações:', e);
+  }
+}
+
+// Marcar notificação como lida
+async function readNotification(id) {
+  try {
+    const res = await fetch(`${API_BASE}/api/affiliates/notifications/${id}/read`, {
+      method: 'POST',
+      headers: Auth.getHeaders()
+    });
+    if (res.ok) {
+      loadAffiliateNotifications();
+    }
+  } catch (e) {
+    console.error(e);
   }
 }
 
