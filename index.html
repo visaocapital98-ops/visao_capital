@@ -340,11 +340,11 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 
 <!-- NAV -->
 <nav id="mainNav">
-  <div class="nav-logo">
-    <div class="logo-circle">VC</div>
-    <div>
-      <div>Cyber Online</div>
-      <div style="font-size:.75rem;color:var(--verde-claro);font-weight:600;">Visão Capital</div>
+  <div class="nav-logo" style="display:flex;align-items:center;gap:12px;">
+    <img src="assets/logo-icon.svg" style="width:40px;height:40px;object-fit:contain;" alt="Logo Icon"/>
+    <div style="line-height:1.2;">
+      <div style="font-weight:800;font-size:1.1rem;color:#fff;">Cyber Online</div>
+      <div style="font-size:.75rem;color:var(--verde-claro);font-weight:700;letter-spacing:1px;">Visão Capital</div>
     </div>
   </div>
   <div class="nav-links" id="navLinks">
@@ -633,7 +633,9 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 <div id="page-affiliate-login" class="page">
   <div class="login-page">
     <div class="login-card">
-      <div style="text-align:center;margin-bottom:20px;"><div class="logo-circle" style="margin:0 auto 12px;width:60px;height:60px;font-size:1.3rem;">VC</div></div>
+      <div style="text-align:center;margin-bottom:20px;">
+        <img src="assets/logo-full.svg" style="height:70px;max-width:100%;object-fit:contain;margin-bottom:12px;" alt="Visão Capital Logo"/>
+      </div>
       <h2>Área do Afiliado</h2>
       <p>Entre com as suas credenciais</p>
       <div class="form-group"><label>Email</label><input type="email" id="af_login_email" placeholder="seu@email.com"/></div>
@@ -649,10 +651,10 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 <div id="page-affiliate-dashboard" class="page">
   <div class="panel-layout">
     <div class="sidebar">
-      <div class="sidebar-logo">
-        <div class="logo-circle" style="margin-bottom:10px;">VC</div>
-        <h3>Painel Afiliado</h3>
-        <p id="af_panel_name">-</p>
+      <div class="sidebar-logo" style="text-align:center;padding:20px 10px;">
+        <img src="assets/logo-icon.svg" style="width:50px;height:50px;margin-bottom:10px;" alt="Logo Icon"/>
+        <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Painel Afiliado</h3>
+        <p id="af_panel_name" style="font-size:0.85rem;color:var(--verde-claro);font-weight:700;">-</p>
       </div>
       <div class="sidebar-menu">
         <a href="javascript:void(0)" class="active" onclick="showAfTab('af-overview')" id="af-menu-overview"><span class="icon">📊</span> Visão Geral</a>
@@ -766,7 +768,10 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 <div id="page-admin-login" class="page">
   <div class="login-page">
     <div class="login-card">
-      <div style="text-align:center;margin-bottom:20px;"><div style="font-size:2.5rem;">🔒</div></div>
+      <div style="text-align:center;margin-bottom:20px;">
+        <img src="assets/logo-full.svg" style="height:70px;max-width:100%;object-fit:contain;margin-bottom:12px;" alt="Visão Capital Logo"/><br/>
+        <span style="font-size:1.5rem;">🔒</span>
+      </div>
       <h2>Acesso Restrito</h2>
       <p>Painel de Administração – Cyber Online Visão Capital</p>
       <div class="form-group"><label>Utilizador</label><input type="text" id="admin_user" placeholder="Administrador" onkeydown="if(event.key==='Enter')loginAdmin()"/></div>
@@ -781,10 +786,10 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 <div id="page-admin-dashboard" class="page">
   <div class="panel-layout">
     <div class="sidebar">
-      <div class="sidebar-logo">
-        <div class="logo-circle" style="margin-bottom:10px;">VC</div>
-        <h3>Administração</h3>
-        <p style="font-size:.75rem;opacity:.7;">Cyber Online Visão Capital</p>
+      <div class="sidebar-logo" style="text-align:center;padding:20px 10px;">
+        <img src="assets/logo-icon.svg" style="width:50px;height:50px;margin-bottom:10px;" alt="Logo Icon"/>
+        <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Administração</h3>
+        <p style="font-size:.75rem;color:var(--verde-claro);font-weight:700;">Cyber Online Visão Capital</p>
       </div>
       <div class="sidebar-menu">
         <a href="javascript:void(0)" class="active" onclick="showAdminTab('adm-overview')" id="adm-menu-overview"><span class="icon">📊</span> Dashboard</a>
