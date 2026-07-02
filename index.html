@@ -1254,6 +1254,20 @@ async function submitOrder(sid, sname, sprice) {
   formData.append('afiliado', afiliado);
   formData.append('comprovativo', comprFile);
 
+  // Recolher automaticamente TODOS os campos do formulário específicos do serviço
+  const formEl = document.getElementById('requestFormCard');
+  if (formEl) {
+    formEl.querySelectorAll('input[id^="f_"], select[id^="f_"], textarea[id^="f_"]').forEach(el => {
+      const key = el.id;
+      // Excluir campos já enviados separadamente ou de controlo
+      const excluir = ['f_cliente_nome','f_cliente_tel','f_comprovativo','f_files','f_afiliado',
+                        'f_certs','f_anexo','f_service_id','f_service_name'];
+      if (!excluir.includes(key) && el.value && el.value.trim() !== '') {
+        formData.append(key, el.value.trim());
+      }
+    });
+  }
+
   if (filesInput && filesInput.files.length > 0) {
     for (let i = 0; i < filesInput.files.length; i++) {
       formData.append('ficheiros', filesInput.files[i]);
@@ -1781,10 +1795,72 @@ function filterOrders(filter, btn) {
   renderOrders();
 }
 
+// Mapa de rótulos legíveis para os campos do formulário
+const FIELD_LABELS = {
+  f_nome: 'Nome Completo', f_contacto: 'Contacto', f_email: 'Email', f_endereco: 'Endereço',
+  f_objetivo: 'Objetivo Profissional', f_formacao: 'Formação Académica',
+  f_experiencia: 'Experiência Profissional', f_cursos: 'Cursos e Certificações',
+  f_competencias: 'Competências', f_idiomas: 'Idiomas',
+  f_empresa: 'Empresa / Organização', f_cargo: 'Cargo Pretendido',
+  f_motivacao: 'Motivo da Candidatura', f_tema: 'Tema do Trabalho',
+  f_curso: 'Curso', f_classe: 'Classe / Ano', f_disciplina: 'Disciplina',
+  f_paginas: 'Número de Páginas', f_prazo: 'Prazo de Entrega',
+  f_instrucoes: 'Instruções Específicas', f_instrucoes_prof: 'Instruções do Professor',
+  f_slides: 'Número de Slides', f_estilo: 'Estilo de Design', f_cores: 'Cores Preferidas',
+  f_conteudo: 'Conteúdo da Apresentação', f_tipodoc: 'Tipo de Documento',
+  f_formato: 'Formato de Saída', f_descricao: 'Descrição do Serviço',
+  f_obs: 'Observações', f_professor: 'Nome do Professor',
+  f_tipo_trabalho_escolar: 'Tipo de Trabalho Escolar', f_nota: 'Nota Pretendida',
+  f_orientador: 'Nome do Orientador', f_tipo_academico: 'Tipo de Trabalho Académico',
+  f_normas: 'Normas de Citação', f_referencias: 'Número de Referências'
+};
+
+function viewOrderDetails(id) {
+  const o = adminOrders.find(x => x.id === id);
+  if (!o) { showToast('Pedido não encontrado', 'error'); return; }
+
+  let detalhes = {};
+  try { detalhes = o.detalhes ? JSON.parse(o.detalhes) : {}; } catch(e) { detalhes = {}; }
+
+  const entries = Object.entries(detalhes);
+  let detalhesHTML = '';
+
+  if (entries.length === 0) {
+    detalhesHTML = `<div style="color:var(--cinza);text-align:center;padding:16px;background:#f9f9f9;border-radius:8px;">Este pedido não tem detalhes de formulário guardados.</div>`;
+  } else {
+    detalhesHTML = `<div style="display:grid;grid-template-columns:1fr;gap:8px;">`;
+    for (const [key, val] of entries) {
+      const label = FIELD_LABELS[key] || key.replace('f_','').replace(/_/g,' ');
+      detalhesHTML += `
+        <div style="border:1px solid #e0e0e0;border-radius:8px;padding:10px 14px;">
+          <div style="font-size:.78rem;font-weight:700;color:var(--verde-escuro);text-transform:uppercase;margin-bottom:4px;">${label}</div>
+          <div style="font-size:.92rem;color:#333;white-space:pre-wrap;">${val}</div>
+        </div>`;
+    }
+    detalhesHTML += `</div>`;
+  }
+
+  openModal(`
+    <h3>📝 Detalhes do Pedido</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;background:#f0fff0;border-radius:8px;padding:12px;">
+      <div><span style="font-size:.78rem;color:var(--cinza);font-weight:600;">PEDIDO</span><br/><strong>${o.id}</strong></div>
+      <div><span style="font-size:.78rem;color:var(--cinza);font-weight:600;">SERVIÇO</span><br/><strong>${o.servico}</strong></div>
+      <div><span style="font-size:.78rem;color:var(--cinza);font-weight:600;">CLIENTE</span><br/>${o.cliente}</div>
+      <div><span style="font-size:.78rem;color:var(--cinza);font-weight:600;">CONTACTO</span><br/>${o.contacto}</div>
+      <div><span style="font-size:.78rem;color:var(--cinza);font-weight:600;">VALOR</span><br/><strong style="color:var(--verde-escuro);">${o.valor} Kz</strong></div>
+      <div><span style="font-size:.78rem;color:var(--cinza);font-weight:600;">DATA</span><br/>${new Date(o.date).toLocaleDateString('pt-PT')}</div>
+    </div>
+    <div style="font-weight:700;color:#333;margin-bottom:10px;">Informações do Formulário</div>
+    ${detalhesHTML}
+    <div class="modal-btns"><button class="btn-confirm" onclick="closeModal()">Fechar</button></div>
+  `);
+}
+
 function orderActions(o) {
   let btns = '';
   // Botão único que mostra comprovativo + ficheiros extras num só modal
   btns += `<button class="action-btn" style="background:#cce5ff;color:#004085;" onclick="viewFicheiros('${o.id}')">📁 Ver Ficheiros</button>`;
+  btns += `<button class="action-btn" style="background:#fff3cd;color:#856404;" onclick="viewOrderDetails('${o.id}')">📝 Detalhes</button>`;
   
   if (o.estado === 'novo') btns += `<button class="action-btn btn-approve" onclick="updateOrder('${o.id}','pago')">✅ Aprovar</button>`;
   if (o.estado === 'pago') btns += `<button class="action-btn btn-complete" onclick="updateOrder('${o.id}','concluido')">🏁 Concluir</button>`;
