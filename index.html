@@ -1783,10 +1783,8 @@ function filterOrders(filter, btn) {
 
 function orderActions(o) {
   let btns = '';
-  if (o.comprovativo_path) btns += `<button class="action-btn" style="background:#e8f5e9;color:#155724;" onclick="viewComprovativo('${o.id}')">🧾 Comprovativo</button>`;
-  
-  // Como o multer guarda anexos em order_files, verificamos via API ao clicar em "Ficheiros"
-  btns += `<button class="action-btn" style="background:#cce5ff;color:#004085;" onclick="viewFicheiros('${o.id}')">📁 Ficheiros</button>`;
+  // Botão único que mostra comprovativo + ficheiros extras num só modal
+  btns += `<button class="action-btn" style="background:#cce5ff;color:#004085;" onclick="viewFicheiros('${o.id}')">📁 Ver Ficheiros</button>`;
   
   if (o.estado === 'novo') btns += `<button class="action-btn btn-approve" onclick="updateOrder('${o.id}','pago')">✅ Aprovar</button>`;
   if (o.estado === 'pago') btns += `<button class="action-btn btn-complete" onclick="updateOrder('${o.id}','concluido')">🏁 Concluir</button>`;
@@ -1812,28 +1810,65 @@ function viewComprovativo(id) {
 }
 
 async function viewFicheiros(id) {
+  const o = adminOrders.find(x => x.id === id);
+  if (!o) { showToast('Pedido não encontrado', 'error'); return; }
+
   try {
+    // Carregar ficheiros adicionais da API
     const res = await fetch(`${API_BASE}/api/admin/orders/${id}/files`, {
       headers: Auth.getHeaders(true)
     });
-    const files = await res.json();
-    if (!files || !files.length) { showToast('Sem ficheiros anexados', 'error'); return; }
+    const extraFiles = await res.json();
+
+    // Construir secção do comprovativo
+    let comprHTML = '';
+    if (o.comprovativo_path) {
+      const isImg = isImage(o.comprovativo_path);
+      comprHTML = `
+        <div style="border:2px solid #c3e6c3;border-radius:10px;padding:14px;background:#f0fff0;">
+          <div style="font-weight:700;color:var(--verde-escuro);margin-bottom:10px;">🧾 Comprovativo de Pagamento</div>
+          ${isImg
+            ? `<img src="${API_BASE}${o.comprovativo_path}" style="width:100%;max-height:350px;object-fit:contain;border-radius:8px;border:1px solid #ddd;"/>`
+            : `<div style="text-align:center;padding:16px;"><p style="margin-bottom:10px;">📄 ${o.comprovativo_name || 'comprovativo.pdf'}</p><a href="${API_BASE}${o.comprovativo_path}" download="${o.comprovativo_name || 'comprovativo'}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:10px 22px;border-radius:8px;font-weight:700;display:inline-block;">📥 Abrir / Descarregar</a></div>`
+          }
+        </div>`;
+    } else {
+      comprHTML = `<div style="border:2px solid #ddd;border-radius:10px;padding:14px;color:var(--cinza);text-align:center;">Sem comprovativo registado</div>`;
+    }
+
+    // Construir secção dos ficheiros extras
+    let extrasHTML = '';
+    if (extraFiles && extraFiles.length > 0) {
+      extrasHTML = `
+        <div style="margin-top:16px;">
+          <div style="font-weight:700;color:#004085;margin-bottom:10px;">📎 Ficheiros Adicionais (${extraFiles.length})</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            ${extraFiles.map((f, i) => {
+              const isImg = isImage(f.file_path);
+              return `<div style="border:1px solid #ddd;border-radius:8px;padding:10px;">
+                <div style="font-weight:600;margin-bottom:6px;">📄 ${f.file_name || 'Ficheiro ' + (i + 1)}</div>
+                ${isImg
+                  ? `<img src="${API_BASE}${f.file_path}" style="max-width:100%;border-radius:6px;"/>`
+                  : `<a href="${API_BASE}${f.file_path}" download="${f.file_name}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:8px 16px;border-radius:6px;font-weight:600;display:inline-block;">📥 Descarregar</a>`
+                }
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    } else {
+      extrasHTML = `<div style="margin-top:12px;background:#f9f9f9;border-radius:8px;padding:12px;color:var(--cinza);font-size:.9rem;text-align:center;">📭 Sem ficheiros adicionais enviados pelo cliente</div>`;
+    }
 
     openModal(`
-      <h3>📁 Ficheiros do Pedido ${id}</h3>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
-        ${files.map((f, i) => {
-          const isImg = isImage(f.file_path);
-          return `<div style="border:1px solid #ddd;border-radius:8px;padding:10px;">
-            <div style="font-weight:600;margin-bottom:6px;">📄 ${f.file_name || 'Ficheiro ' + (i + 1)}</div>
-            ${isImg ? `<img src="${API_BASE}${f.file_path}" style="max-width:100%;border-radius:6px;"/>` : `<a href="${API_BASE}${f.file_path}" download="${f.file_name}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:8px 16px;border-radius:6px;font-weight:600;display:inline-block;">📥 Descarregar</a>`}
-          </div>`;
-        }).join('')}
-      </div>
+      <h3>📁 Documentos do Pedido</h3>
+      <p style="color:var(--cinza);font-size:.85rem;margin-bottom:14px;">Pedido: <strong>${o.id}</strong> | Cliente: <strong>${o.cliente}</strong></p>
+      ${comprHTML}
+      ${extrasHTML}
       <div class="modal-btns"><button class="btn-confirm" onclick="closeModal()">Fechar</button></div>
     `);
   } catch (e) {
     showToast('Erro ao carregar ficheiros', 'error');
+    console.error(e);
   }
 }
 
