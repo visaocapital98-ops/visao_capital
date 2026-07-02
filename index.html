@@ -341,7 +341,87 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 <!-- NAV -->
 <nav id="mainNav">
   <div class="nav-logo" style="display:flex;align-items:center;gap:12px;">
-    <img src="assets/logo-icon.svg" style="width:40px;height:40px;object-fit:contain;" alt="Logo Icon"/>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width:40px;height:40px;object-fit:contain;">
+  <defs>
+    <!-- Modern cyber tech gradient matching the green brand identity -->
+    <linearGradient id="cyberGreenGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#052e16" /> <!-- Deep forest green -->
+      <stop offset="30%" stop-color="#15803d" /> <!-- Vibrant leaf green -->
+      <stop offset="70%" stop-color="#22c55e" /> <!-- Bright green -->
+      <stop offset="100%" stop-color="#4ade80" /> <!-- Light mint green -->
+    </linearGradient>
+    
+    <!-- Subtle drop shadow to give depth and the 3D metallic feel of the original logo -->
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#logoShadow)">
+    <!-- Stylized 'C' (Left) -->
+    <path d="M 46,24 
+             A 28,28 0 1,0 46,76 
+             A 28,28 0 0,0 52,68" 
+          fill="none" 
+          stroke="url(#cyberGreenGrad)" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Stylized 'O' Circle (Right) that overlaps/interlocks with 'C' -->
+    <circle cx="62" cy="50" r="28" 
+            fill="none" 
+            stroke="url(#cyberGreenGrad)" 
+            stroke-width="8" />
+
+    <!-- Brain Lightbulb Symbol inside 'O' -->
+    <g transform="translate(48.5, 34) scale(0.68)">
+      <!-- Bulb base/socket thread -->
+      <path d="M 12,38 H 28 V 40 H 12 Z 
+               M 14,41 H 26 V 43 H 14 Z 
+               M 17,44 H 23 V 46 H 17 Z" 
+            fill="url(#cyberGreenGrad)" />
+            
+      <!-- Rounded tip of the bulb base -->
+      <path d="M 18,46 A 2,2 0 0,0 22,46 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Left Brain Lobe / Bulb body -->
+      <path d="M 18,36 
+               C 10,36 8,30 8,24 
+               C 8,20 11,18 13,17 
+               C 11,15 11,10 14,8 
+               C 15,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Right Brain Lobe / Bulb body (mirrored) -->
+      <path d="M 22,36 
+               C 30,36 32,30 32,24 
+               C 32,20 29,18 27,17 
+               C 29,15 29,10 26,8 
+               C 25,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" 
+            transform="translate(42, 0) scale(-1, 1)" />
+
+      <!-- Electronic Circuitry Tracks & Nodes (White inside the green brain) -->
+      <!-- Left circuit node/lines -->
+      <circle cx="14" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 14,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="12" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 15,27 L 12,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+
+      <!-- Right circuit node/lines -->
+      <circle cx="26" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 26,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="28" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 25,27 L 28,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+    </g>
+  </g>
+</svg>
     <div style="line-height:1.2;">
       <div style="font-weight:800;font-size:1.1rem;color:#fff;">Cyber Online</div>
       <div style="font-size:.75rem;color:var(--verde-claro);font-weight:700;letter-spacing:1px;">Visão Capital</div>
@@ -634,7 +714,106 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
   <div class="login-page">
     <div class="login-card">
       <div style="text-align:center;margin-bottom:20px;">
-        <img src="assets/logo-full.svg" style="height:70px;max-width:100%;object-fit:contain;margin-bottom:12px;" alt="Visão Capital Logo"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" style="height:70px;max-width:100%;object-fit:contain;margin-bottom:12px;">
+  <defs>
+    <!-- Modern cyber tech gradient matching the green brand identity -->
+    <linearGradient id="cyberGreenGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#052e16" /> <!-- Deep forest green -->
+      <stop offset="30%" stop-color="#15803d" /> <!-- Vibrant leaf green -->
+      <stop offset="70%" stop-color="#22c55e" /> <!-- Bright green -->
+      <stop offset="100%" stop-color="#4ade80" /> <!-- Light mint green -->
+    </linearGradient>
+    
+    <!-- Subtle drop shadow to give depth and the 3D metallic feel of the original logo -->
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Logo Icon on the left -->
+  <g filter="url(#logoShadow)" transform="translate(10, 5) scale(0.7)">
+    <!-- Stylized 'C' (Left) -->
+    <path d="M 46,24 
+             A 28,28 0 1,0 46,76 
+             A 28,28 0 0,0 52,68" 
+          fill="none" 
+          stroke="url(#cyberGreenGrad)" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Stylized 'O' Circle (Right) that overlaps/interlocks with 'C' -->
+    <circle cx="62" cy="50" r="28" 
+            fill="none" 
+            stroke="url(#cyberGreenGrad)" 
+            stroke-width="8" />
+
+    <!-- Brain Lightbulb Symbol inside 'O' -->
+    <g transform="translate(48.5, 34) scale(0.68)">
+      <!-- Bulb base/socket thread -->
+      <path d="M 12,38 H 28 V 40 H 12 Z 
+               M 14,41 H 26 V 43 H 14 Z 
+               M 17,44 H 23 V 46 H 17 Z" 
+            fill="url(#cyberGreenGrad)" />
+            
+      <!-- Rounded tip of the bulb base -->
+      <path d="M 18,46 A 2,2 0 0,0 22,46 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Left Brain Lobe / Bulb body -->
+      <path d="M 18,36 
+               C 10,36 8,30 8,24 
+               C 8,20 11,18 13,17 
+               C 11,15 11,10 14,8 
+               C 15,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Right Brain Lobe / Bulb body (mirrored) -->
+      <path d="M 22,36 
+               C 30,36 32,30 32,24 
+               C 32,20 29,18 27,17 
+               C 29,15 29,10 26,8 
+               C 25,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" 
+            transform="translate(42, 0) scale(-1, 1)" />
+
+      <!-- Electronic Circuitry Tracks & Nodes (White inside the green brain) -->
+      <!-- Left circuit node/lines -->
+      <circle cx="14" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 14,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="12" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 15,27 L 12,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+
+      <!-- Right circuit node/lines -->
+      <circle cx="26" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 26,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="28" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 25,27 L 28,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+    </g>
+  </g>
+
+  <!-- Typography on the right -->
+  <text x="90" y="38" 
+        fill="url(#cyberGreenGrad)" 
+        font-family="'Outfit', 'Inter', 'Segoe UI', sans-serif" 
+        font-size="22" 
+        font-weight="800" 
+        letter-spacing="0.5px">CYBER ONLINE</text>
+
+  <text x="90" y="55" 
+        fill="#16a34a" 
+        font-family="'Outfit', 'Inter', 'Segoe UI', sans-serif" 
+        font-size="11" 
+        font-weight="700" 
+        letter-spacing="4px">VISÃO CAPITAL</text>
+        
+  <!-- Modern thin green accent line underneath Visão Capital -->
+  <path d="M 90,62 L 260,62" stroke="url(#cyberGreenGrad)" stroke-width="1.5" stroke-linecap="round" />
+</svg>
       </div>
       <h2>Área do Afiliado</h2>
       <p>Entre com as suas credenciais</p>
@@ -652,7 +831,87 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
   <div class="panel-layout">
     <div class="sidebar">
       <div class="sidebar-logo" style="text-align:center;padding:20px 10px;">
-        <img src="assets/logo-icon.svg" style="width:50px;height:50px;margin-bottom:10px;" alt="Logo Icon"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width:50px;height:50px;margin-bottom:10px;object-fit:contain;">
+  <defs>
+    <!-- Modern cyber tech gradient matching the green brand identity -->
+    <linearGradient id="cyberGreenGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#052e16" /> <!-- Deep forest green -->
+      <stop offset="30%" stop-color="#15803d" /> <!-- Vibrant leaf green -->
+      <stop offset="70%" stop-color="#22c55e" /> <!-- Bright green -->
+      <stop offset="100%" stop-color="#4ade80" /> <!-- Light mint green -->
+    </linearGradient>
+    
+    <!-- Subtle drop shadow to give depth and the 3D metallic feel of the original logo -->
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#logoShadow)">
+    <!-- Stylized 'C' (Left) -->
+    <path d="M 46,24 
+             A 28,28 0 1,0 46,76 
+             A 28,28 0 0,0 52,68" 
+          fill="none" 
+          stroke="url(#cyberGreenGrad)" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Stylized 'O' Circle (Right) that overlaps/interlocks with 'C' -->
+    <circle cx="62" cy="50" r="28" 
+            fill="none" 
+            stroke="url(#cyberGreenGrad)" 
+            stroke-width="8" />
+
+    <!-- Brain Lightbulb Symbol inside 'O' -->
+    <g transform="translate(48.5, 34) scale(0.68)">
+      <!-- Bulb base/socket thread -->
+      <path d="M 12,38 H 28 V 40 H 12 Z 
+               M 14,41 H 26 V 43 H 14 Z 
+               M 17,44 H 23 V 46 H 17 Z" 
+            fill="url(#cyberGreenGrad)" />
+            
+      <!-- Rounded tip of the bulb base -->
+      <path d="M 18,46 A 2,2 0 0,0 22,46 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Left Brain Lobe / Bulb body -->
+      <path d="M 18,36 
+               C 10,36 8,30 8,24 
+               C 8,20 11,18 13,17 
+               C 11,15 11,10 14,8 
+               C 15,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Right Brain Lobe / Bulb body (mirrored) -->
+      <path d="M 22,36 
+               C 30,36 32,30 32,24 
+               C 32,20 29,18 27,17 
+               C 29,15 29,10 26,8 
+               C 25,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" 
+            transform="translate(42, 0) scale(-1, 1)" />
+
+      <!-- Electronic Circuitry Tracks & Nodes (White inside the green brain) -->
+      <!-- Left circuit node/lines -->
+      <circle cx="14" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 14,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="12" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 15,27 L 12,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+
+      <!-- Right circuit node/lines -->
+      <circle cx="26" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 26,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="28" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 25,27 L 28,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+    </g>
+  </g>
+</svg>
         <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Painel Afiliado</h3>
         <p id="af_panel_name" style="font-size:0.85rem;color:var(--verde-claro);font-weight:700;">-</p>
       </div>
@@ -769,7 +1028,106 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
   <div class="login-page">
     <div class="login-card">
       <div style="text-align:center;margin-bottom:20px;">
-        <img src="assets/logo-full.svg" style="height:70px;max-width:100%;object-fit:contain;margin-bottom:12px;" alt="Visão Capital Logo"/><br/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" style="height:70px;max-width:100%;object-fit:contain;margin-bottom:12px;">
+  <defs>
+    <!-- Modern cyber tech gradient matching the green brand identity -->
+    <linearGradient id="cyberGreenGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#052e16" /> <!-- Deep forest green -->
+      <stop offset="30%" stop-color="#15803d" /> <!-- Vibrant leaf green -->
+      <stop offset="70%" stop-color="#22c55e" /> <!-- Bright green -->
+      <stop offset="100%" stop-color="#4ade80" /> <!-- Light mint green -->
+    </linearGradient>
+    
+    <!-- Subtle drop shadow to give depth and the 3D metallic feel of the original logo -->
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Logo Icon on the left -->
+  <g filter="url(#logoShadow)" transform="translate(10, 5) scale(0.7)">
+    <!-- Stylized 'C' (Left) -->
+    <path d="M 46,24 
+             A 28,28 0 1,0 46,76 
+             A 28,28 0 0,0 52,68" 
+          fill="none" 
+          stroke="url(#cyberGreenGrad)" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Stylized 'O' Circle (Right) that overlaps/interlocks with 'C' -->
+    <circle cx="62" cy="50" r="28" 
+            fill="none" 
+            stroke="url(#cyberGreenGrad)" 
+            stroke-width="8" />
+
+    <!-- Brain Lightbulb Symbol inside 'O' -->
+    <g transform="translate(48.5, 34) scale(0.68)">
+      <!-- Bulb base/socket thread -->
+      <path d="M 12,38 H 28 V 40 H 12 Z 
+               M 14,41 H 26 V 43 H 14 Z 
+               M 17,44 H 23 V 46 H 17 Z" 
+            fill="url(#cyberGreenGrad)" />
+            
+      <!-- Rounded tip of the bulb base -->
+      <path d="M 18,46 A 2,2 0 0,0 22,46 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Left Brain Lobe / Bulb body -->
+      <path d="M 18,36 
+               C 10,36 8,30 8,24 
+               C 8,20 11,18 13,17 
+               C 11,15 11,10 14,8 
+               C 15,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Right Brain Lobe / Bulb body (mirrored) -->
+      <path d="M 22,36 
+               C 30,36 32,30 32,24 
+               C 32,20 29,18 27,17 
+               C 29,15 29,10 26,8 
+               C 25,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" 
+            transform="translate(42, 0) scale(-1, 1)" />
+
+      <!-- Electronic Circuitry Tracks & Nodes (White inside the green brain) -->
+      <!-- Left circuit node/lines -->
+      <circle cx="14" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 14,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="12" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 15,27 L 12,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+
+      <!-- Right circuit node/lines -->
+      <circle cx="26" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 26,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="28" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 25,27 L 28,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+    </g>
+  </g>
+
+  <!-- Typography on the right -->
+  <text x="90" y="38" 
+        fill="url(#cyberGreenGrad)" 
+        font-family="'Outfit', 'Inter', 'Segoe UI', sans-serif" 
+        font-size="22" 
+        font-weight="800" 
+        letter-spacing="0.5px">CYBER ONLINE</text>
+
+  <text x="90" y="55" 
+        fill="#16a34a" 
+        font-family="'Outfit', 'Inter', 'Segoe UI', sans-serif" 
+        font-size="11" 
+        font-weight="700" 
+        letter-spacing="4px">VISÃO CAPITAL</text>
+        
+  <!-- Modern thin green accent line underneath Visão Capital -->
+  <path d="M 90,62 L 260,62" stroke="url(#cyberGreenGrad)" stroke-width="1.5" stroke-linecap="round" />
+</svg><br/>
         <span style="font-size:1.5rem;">🔒</span>
       </div>
       <h2>Acesso Restrito</h2>
@@ -787,7 +1145,87 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
   <div class="panel-layout">
     <div class="sidebar">
       <div class="sidebar-logo" style="text-align:center;padding:20px 10px;">
-        <img src="assets/logo-icon.svg" style="width:50px;height:50px;margin-bottom:10px;" alt="Logo Icon"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width:50px;height:50px;margin-bottom:10px;object-fit:contain;">
+  <defs>
+    <!-- Modern cyber tech gradient matching the green brand identity -->
+    <linearGradient id="cyberGreenGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#052e16" /> <!-- Deep forest green -->
+      <stop offset="30%" stop-color="#15803d" /> <!-- Vibrant leaf green -->
+      <stop offset="70%" stop-color="#22c55e" /> <!-- Bright green -->
+      <stop offset="100%" stop-color="#4ade80" /> <!-- Light mint green -->
+    </linearGradient>
+    
+    <!-- Subtle drop shadow to give depth and the 3D metallic feel of the original logo -->
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#logoShadow)">
+    <!-- Stylized 'C' (Left) -->
+    <path d="M 46,24 
+             A 28,28 0 1,0 46,76 
+             A 28,28 0 0,0 52,68" 
+          fill="none" 
+          stroke="url(#cyberGreenGrad)" 
+          stroke-width="8" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Stylized 'O' Circle (Right) that overlaps/interlocks with 'C' -->
+    <circle cx="62" cy="50" r="28" 
+            fill="none" 
+            stroke="url(#cyberGreenGrad)" 
+            stroke-width="8" />
+
+    <!-- Brain Lightbulb Symbol inside 'O' -->
+    <g transform="translate(48.5, 34) scale(0.68)">
+      <!-- Bulb base/socket thread -->
+      <path d="M 12,38 H 28 V 40 H 12 Z 
+               M 14,41 H 26 V 43 H 14 Z 
+               M 17,44 H 23 V 46 H 17 Z" 
+            fill="url(#cyberGreenGrad)" />
+            
+      <!-- Rounded tip of the bulb base -->
+      <path d="M 18,46 A 2,2 0 0,0 22,46 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Left Brain Lobe / Bulb body -->
+      <path d="M 18,36 
+               C 10,36 8,30 8,24 
+               C 8,20 11,18 13,17 
+               C 11,15 11,10 14,8 
+               C 15,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" />
+
+      <!-- Right Brain Lobe / Bulb body (mirrored) -->
+      <path d="M 22,36 
+               C 30,36 32,30 32,24 
+               C 32,20 29,18 27,17 
+               C 29,15 29,10 26,8 
+               C 25,4 20,4 20,4 
+               L 20,36 Z" 
+            fill="url(#cyberGreenGrad)" 
+            transform="translate(42, 0) scale(-1, 1)" />
+
+      <!-- Electronic Circuitry Tracks & Nodes (White inside the green brain) -->
+      <!-- Left circuit node/lines -->
+      <circle cx="14" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 14,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="12" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 15,27 L 12,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+
+      <!-- Right circuit node/lines -->
+      <circle cx="26" cy="15" r="1.5" fill="#ffffff" />
+      <path d="M 20,32 L 20,18 L 26,15" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+      
+      <circle cx="28" cy="24" r="1.5" fill="#ffffff" />
+      <path d="M 20,27 L 25,27 L 28,24" fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+    </g>
+  </g>
+</svg>
         <h3 style="font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px;">Administração</h3>
         <p style="font-size:.75rem;color:var(--verde-claro);font-weight:700;">Cyber Online Visão Capital</p>
       </div>
