@@ -26,6 +26,14 @@ Concluímos com sucesso a transição da aplicação estática baseada em `local
 * Redesenho dos logótipos oficiais em formatos vetoriais de alta definição (`assets/logo-icon.svg` e `assets/logo-full.svg`).
 * Inclusão do código SVG *inline* no `index.html` para assegurar compatibilidade absoluta em qualquer navegador, evitando cache quebrada e falhas de renderização.
 
+### 6. Persistência Permanente de Ficheiros e Fotos (MySQL LONGBLOB) 💾 [NOVO]
+* **Problema Resolvido:** O Railway possui armazenamento efêmero (os ficheiros locais em `/uploads` eram eliminados a cada nova versão ou reinício do servidor).
+* **Solução:** 
+  * Criada a tabela `stored_files` na base de dados persistente MySQL (Alwaysdata) com coluna `LONGBLOB`.
+  * Toda nova foto de perfil, comprovativo de pagamento e ficheiro anexado é guardado automaticamente na base de dados de forma segura.
+  * Criada rota de fallback `GET /uploads/:filename` que, caso o ficheiro não exista fisicamente no disco do contentor do Railway, o recupera automaticamente da base de dados Alwaysdata, grava-o em cache de disco local e serve-o ao utilizador sem qualquer quebra.
+* **Edição de Perfil de Afiliado:** Implementado o modal **"✏️ Editar Perfil"** no painel de afiliado com rota de atualização que permite atualizar dados cadastrais e trocar/submeter a foto de perfil.
+
 ---
 
 ## Como Executar Localmente
