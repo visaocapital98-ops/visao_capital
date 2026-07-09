@@ -500,7 +500,7 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
       <div class="form-group"><label>Utilizador</label><input type="text" id="admin_user" placeholder="Administrador" onkeydown="if(event.key==='Enter')loginAdmin()"/></div>
       <div class="form-group"><label>Palavra-passe</label><input type="password" id="admin_pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginAdmin()"/></div>
       <button class="submit-btn" onclick="loginAdmin()">🔒 Entrar no Painel</button>
-      <p style="text-align:center;margin-top:12px;"><a href="javascript:void(0)" onclick="showPage('home')" style="color:var(--cinza);font-size:.85rem;">← Voltar ao site</a></p>
+      <p style="text-align:center;margin-top:12px;"><a href="/" style="color:var(--cinza);font-size:.85rem;">← Voltar ao site</a></p>
     </div>
   </div>
 </div>
@@ -889,6 +889,16 @@ const Auth = {
   
   getHeaders(isAdmin = false) {
     const headers = {};
+    if (isAdmin) {
+      const token = this.getAdminToken();
+      if (token) headers['X-Admin-Token'] = token;
+    } else {
+      const token = this.getAffiliateToken();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+    }
+    return headers;
+  }
+};
 
 const isImage = (filePath) => {
   if (!filePath) return false;
@@ -973,7 +983,7 @@ async function loginAdmin() {
 function logoutAdmin() {
   Auth.removeAdminToken();
   adminLoggedIn = false;
-  showPage('home');
+  showPage('admin-login');
 }
 
 // ==============================
