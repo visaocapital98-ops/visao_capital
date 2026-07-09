@@ -328,6 +328,7 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 .toast.error{background:#dc3545;}
 .toast.success{background:#28a745;}
 @keyframes slideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%{opacity:0.4;}50%{opacity:1;}100%{opacity:0.4;}}
 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -1332,6 +1333,7 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
         <a href="javascript:void(0)" class="active" onclick="showAdminTab('adm-overview')" id="adm-menu-overview"><span class="icon">📊</span> Dashboard</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-orders')" id="adm-menu-orders"><span class="icon">📋</span> Pedidos <span class="notif-badge" id="newOrdersBadge">0</span></a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-finances')" id="adm-menu-finances"><span class="icon">💰</span> Finanças</a>
+        <a href="javascript:void(0)" onclick="showAdminTab('adm-traffic')" id="adm-menu-traffic"><span class="icon">📈</span> Visitas e Tráfego</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-affiliates')" id="adm-menu-affiliates"><span class="icon">🤝</span> Afiliados</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-reviews')" id="adm-menu-reviews"><span class="icon">⭐</span> Avaliações</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-services')" id="adm-menu-services"><span class="icon">🛠️</span> Serviços</a>
@@ -1501,6 +1503,83 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
             <textarea id="notif_message" placeholder="Escreva uma mensagem para todos os afiliados..."></textarea>
           </div>
           <button class="submit-btn" onclick="sendNotification()" style="max-width:200px;">🔔 Enviar Notificação</button>
+        </div>
+      </div>
+
+      <!-- VISITAS E TRÁFEGO -->
+      <div class="tab-panel" id="adm-traffic">
+        <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2>Monitorização de Tráfego</h2>
+            <p>Estatísticas reais de visitas e conversão do seu website</p>
+          </div>
+          <!-- REAL-TIME STATUS BADGE -->
+          <div style="background:#e6fcf0;border:1px solid #c3f6db;color:#0e623b;padding:8px 16px;border-radius:20px;font-weight:700;display:flex;align-items:center;gap:8px;font-size:0.9rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+            <span style="width:10px;height:10px;background:#10b981;border-radius:50%;display:inline-block;animation:pulse 1.5s infinite;"></span>
+            <span id="traffic_active_users">0</span> Visitantes Ativos (últimos 15 min)
+          </div>
+        </div>
+
+        <!-- PERIOD TABS -->
+        <div class="tab-btns" style="margin-top:20px;">
+          <button class="tab-btn active" id="traffic_btn_today" onclick="setTrafficPeriod('today')">Hoje</button>
+          <button class="tab-btn" id="traffic_btn_last7days" onclick="setTrafficPeriod('last7days')">Últimos 7 Dias</button>
+          <button class="tab-btn" id="traffic_btn_month" onclick="setTrafficPeriod('month')">Este Mês</button>
+          <button class="tab-btn" id="traffic_btn_year" onclick="setTrafficPeriod('year')">Este Ano</button>
+        </div>
+
+        <!-- STATS GRID -->
+        <div class="stats-grid" style="margin-top:16px;">
+          <div class="stat-card" style="background:#f4f6fa;border-left:4px solid #3b82f6;">
+            <div class="icon">👥</div>
+            <div class="val" id="traffic_total_visitors">0</div>
+            <div class="lbl">Total Visitantes</div>
+          </div>
+          <div class="stat-card" style="background:#f4f6fa;border-left:4px solid #6b7280;">
+            <div class="icon">👀</div>
+            <div class="val" id="traffic_only_visited">0</div>
+            <div class="lbl">Apenas Visitaram</div>
+          </div>
+          <div class="stat-card" style="background:#f4f6fa;border-left:4px solid #10b981;">
+            <div class="icon">🛍️</div>
+            <div class="val" id="traffic_ordered">0</div>
+            <div class="lbl">Fizeram Pedidos</div>
+          </div>
+          <div class="stat-card" style="background:#f4f6fa;border-left:4px solid #f59e0b;">
+            <div class="icon">⭐</div>
+            <div class="val" id="traffic_reviewed">0</div>
+            <div class="lbl">Avaliaram</div>
+          </div>
+          <div class="stat-card" style="background:#f4f6fa;border-left:4px solid #8b5cf6;grid-column: span 2;">
+            <div class="icon">📈</div>
+            <div class="val" id="traffic_conversion_rate">0%</div>
+            <div class="lbl">Taxa de Conversão de Pedidos</div>
+          </div>
+        </div>
+
+        <!-- HISTORY TRENDS -->
+        <div class="table-container" style="margin-top:28px;">
+          <div class="table-header">
+            <h3>Histórico Diário (Últimos 7 Dias)</h3>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Visitantes Únicos</th>
+                  <th>Pedidos Criados</th>
+                  <th>Avaliações Submetidas</th>
+                  <th>Taxa de Conversão</th>
+                </tr>
+              </thead>
+              <tbody id="traffic_history_rows">
+                <tr>
+                  <td colspan="5" style="text-align:center;color:var(--cinza);padding:16px;">A carregar histórico...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1809,6 +1888,9 @@ async function submitOrder(sid, sname, sprice) {
   formData.append('valor', sprice);
   formData.append('afiliado', afiliado);
   formData.append('comprovativo', comprFile);
+  if (typeof visitorId !== 'undefined' && visitorId) {
+    formData.append('visitor_id', visitorId);
+  }
 
   // Recolher automaticamente TODOS os campos do formulário específicos do serviço
   const formEl = document.getElementById('requestFormCard');
@@ -1942,7 +2024,7 @@ async function submitReview() {
     const res = await fetch(`${API_BASE}/api/reviews`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, stars: currentRating, comment })
+      body: JSON.stringify({ name, stars: currentRating, comment, visitor_id: typeof visitorId !== 'undefined' ? visitorId : null })
     });
     const data = await res.json();
     if (data.error) {
@@ -2356,6 +2438,86 @@ function showAdminTab(tab) {
   if (tab === 'adm-services') renderAdminServices();
   if (tab === 'adm-finances') renderFinances();
   if (tab === 'adm-settings') loadSettingsForm();
+  if (tab === 'adm-traffic') renderTrafficStats();
+}
+
+let cachedTrafficData = null;
+let currentTrafficPeriod = 'today';
+
+async function renderTrafficStats() {
+  const token = Auth.getAdminToken();
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/traffic-stats`, {
+      headers: Auth.getHeaders(true)
+    });
+    if (res.status === 401) {
+      logoutAdmin();
+      return;
+    }
+    const data = await res.json();
+    cachedTrafficData = data;
+
+    // Renderizar utilizadores ativos em tempo real
+    document.getElementById('traffic_active_users').textContent = data.active_visitors;
+
+    // Renderizar o período selecionado atualmente
+    updateTrafficPeriodDisplay();
+
+    // Renderizar a tabela de histórico diário
+    const historyRows = document.getElementById('traffic_history_rows');
+    if (data.daily_history && data.daily_history.length > 0) {
+      historyRows.innerHTML = data.daily_history.map(day => {
+        const dateStr = new Date(day.date).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const convRate = day.visitors > 0 ? ((day.orders / day.visitors) * 100).toFixed(1) + '%' : '0%';
+        return `
+          <tr>
+            <td style="font-weight:600;">${dateStr}</td>
+            <td>${day.visitors}</td>
+            <td>${day.orders}</td>
+            <td>${day.reviews}</td>
+            <td><span class="badge badge-blue">${convRate}</span></td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      historyRows.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--cinza);padding:16px;">Sem histórico de tráfego nos últimos 7 dias.</td></tr>`;
+    }
+  } catch (err) {
+    console.error('Erro ao renderizar tráfego:', err);
+    showToast('Erro ao carregar estatísticas de tráfego', 'error');
+  }
+}
+
+function setTrafficPeriod(period) {
+  currentTrafficPeriod = period;
+  
+  // Atualizar botões ativos
+  document.querySelectorAll('#adm-traffic .tab-btns .tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const activeBtn = document.getElementById('traffic_btn_' + period);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  updateTrafficPeriodDisplay();
+}
+
+function updateTrafficPeriodDisplay() {
+  if (!cachedTrafficData) return;
+
+  const stats = cachedTrafficData.periods[currentTrafficPeriod];
+  if (!stats) return;
+
+  const convRate = stats.total_visitors > 0 
+    ? ((stats.ordered_visitors / stats.total_visitors) * 100).toFixed(1) + '%' 
+    : '0%';
+
+  document.getElementById('traffic_total_visitors').textContent = stats.total_visitors;
+  document.getElementById('traffic_only_visited').textContent = stats.only_visited_visitors;
+  document.getElementById('traffic_ordered').textContent = stats.ordered_visitors;
+  document.getElementById('traffic_reviewed').textContent = stats.reviewed_visitors;
+  document.getElementById('traffic_conversion_rate').textContent = convRate;
 }
 
 async function renderAdminDashboard() {
@@ -3331,7 +3493,23 @@ function showToast(msg, type = 'success') {
 // ==============================
 // APP INITIALIZATION
 // ==============================
+let visitorId = null;
+
 async function initApp() {
+  // Geração e persistência do ID de visitante único para analíticas reais
+  visitorId = localStorage.getItem('vc_visitor_id');
+  if (!visitorId) {
+    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+    localStorage.setItem('vc_visitor_id', visitorId);
+  }
+
+  // Registar visita na base de dados
+  fetch(`${API_BASE}/api/visits`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ visitor_id: visitorId })
+  }).catch(err => console.warn('Erro ao registar visita:', err));
+
   await initDefaults();
   renderHomeStats();
   
