@@ -781,8 +781,30 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
         <div class="admin-section">
           <h3>🔔 Enviar Notificação a Afiliados</h3>
           <div class="form-group">
+            <label>Título da Notificação</label>
+            <input type="text" id="notif_title" placeholder="Ex: Nova Campanha de Vendas" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Categoria / Tipo</label>
+              <select id="notif_type">
+                <option value="geral">Geral 📢</option>
+                <option value="promo">🎉 Promoção</option>
+                <option value="novidade">🆕 Novidade</option>
+                <option value="oferta">🎁 Oferta</option>
+                <option value="produto">📦 Novo Produto</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Destinatário</label>
+              <select id="notif_destinatario">
+                <option value="todos">Todos os Afiliados 👥</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
             <label>Mensagem da Notificação</label>
-            <textarea id="notif_message" placeholder="Escreva uma mensagem para todos os afiliados..."></textarea>
+            <textarea id="notif_message" placeholder="Escreva uma mensagem para os afiliados..." style="min-height:100px;"></textarea>
           </div>
           <button class="submit-btn" onclick="sendNotification()" style="max-width:200px;">🔔 Enviar Notificação</button>
         </div>
@@ -1039,7 +1061,10 @@ function showAdminTab(tab) {
   if (tab === 'adm-reviews') renderAdminReviews();
   if (tab === 'adm-services') renderAdminServices();
   if (tab === 'adm-finances') renderFinances();
-  if (tab === 'adm-settings') loadSettingsForm();
+  if (tab === 'adm-settings') {
+    loadSettingsForm();
+    loadAffiliatesDropdown();
+  }
   if (tab === 'adm-traffic') renderTrafficStats();
 }
 
@@ -1908,6 +1933,26 @@ function loadSettingsForm() {
   setVal('set_whatsapp', s.whatsapp);
   setVal('set_email', s.email);
   setVal('set_commission', s.commission || 25);
+}
+
+async function loadAffiliatesDropdown() {
+  const select = document.getElementById('notif_destinatario');
+  if (!select) return;
+
+  try {
+    const res = await adminFetch(`${API_BASE}/api/admin/affiliates`, {
+      headers: Auth.getHeaders(true)
+    });
+    const affiliates = await res.json();
+    
+    let html = '<option value="todos">Todos os Afiliados 👥</option>';
+    affiliates.forEach(a => {
+      html += `<option value="${a.id}">${a.nome} (${a.code})</option>`;
+    });
+    select.innerHTML = html;
+  } catch (e) {
+    console.error('Erro ao carregar afiliados para notificações:', e);
+  }
 }
 
 async function updateAdminCredentials() {
