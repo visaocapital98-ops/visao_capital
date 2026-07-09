@@ -1128,6 +1128,12 @@ const isImage = (filePath) => {
   return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'].includes(ext);
 };
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-PT');
+};
+
 // ==============================
 // STATE / DATA CACHE
 // ==============================
@@ -1688,21 +1694,21 @@ async function renderAffiliateDashboard() {
 
     const orders = data.orders;
     const salesHTML = orders.slice(0, 5).map(o => `
-      <tr><td>${new Date(o.date).toLocaleDateString('pt-PT')}</td><td>${o.cliente}</td><td>${o.servico}</td><td>${o.valor} Kz</td>
+      <tr><td>${formatDate(o.date)}</td><td>${o.cliente}</td><td>${o.servico}</td><td>${o.valor} Kz</td>
       <td>${Math.round(parsePrice(o.valor) * commRate)} Kz</td>
       <td>${stateBadge(o.estado)}</td></tr>
     `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--cinza);">Nenhuma venda ainda</td></tr>';
     document.getElementById('af_sales_preview').innerHTML = salesHTML;
 
     document.getElementById('af_all_sales').innerHTML = orders.length ? orders.map(o => `
-      <tr><td>${new Date(o.date).toLocaleDateString('pt-PT')}</td><td>${o.cliente}</td><td>${o.servico}</td><td>${o.valor} Kz</td>
+      <tr><td>${formatDate(o.date)}</td><td>${o.cliente}</td><td>${o.servico}</td><td>${o.valor} Kz</td>
       <td>${Math.round(parsePrice(o.valor) * commRate)} Kz</td>
       <td>${stateBadge(o.estado)}</td></tr>
     `).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--cinza);">Nenhuma venda ainda</td></tr>';
 
     const withdrawals = data.withdrawals;
     document.getElementById('af_withdrawals').innerHTML = withdrawals.map(w => `
-      <tr><td>${new Date(w.date).toLocaleDateString('pt-PT')}</td><td>${fmt(w.amount)} Kz</td><td>${w.method}</td><td>${stateBadge(w.estado)}</td></tr>
+      <tr><td>${formatDate(w.date)}</td><td>${fmt(w.amount)} Kz</td><td>${w.method}</td><td>${stateBadge(w.estado)}</td></tr>
     `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--cinza);">Nenhum levantamento ainda</td></tr>';
 
     document.getElementById('af_profile_info').innerHTML = `
@@ -1712,7 +1718,7 @@ async function renderAffiliateDashboard() {
       <div class="setting-row"><span class="setting-label">Telefone</span><span class="setting-val">${af.tel}</span></div>
       <div class="setting-row"><span class="setting-label">Endereço</span><span class="setting-val">${af.endereco || 'N/A'}</span></div>
       <div class="setting-row"><span class="setting-label">Código de Afiliado</span><span class="setting-val" style="font-weight:700;color:var(--verde-escuro);font-family:monospace;font-size:1.1rem;">${af.code}</span></div>
-      <div class="setting-row"><span class="setting-label">Data de Registo</span><span class="setting-val">${new Date(af.date_joined).toLocaleDateString('pt-PT')}</span></div>
+      <div class="setting-row"><span class="setting-label">Data de Registo</span><span class="setting-val">${formatDate(af.date_joined)}</span></div>
       <div class="setting-row"><span class="setting-label">Banco</span><span class="setting-val">${af.banco_nome || 'N/A'}</span></div>
       <div class="setting-row"><span class="setting-label">Número de Conta</span><span class="setting-val">${af.banco || 'N/A'}</span></div>
       <div class="setting-row"><span class="setting-label">Titular</span><span class="setting-val">${af.banco_titular || 'N/A'}</span></div>
@@ -2026,7 +2032,7 @@ async function loadAffiliateNotifications() {
           <div style="border-radius:8px;padding:16px;box-shadow:0 2px 4px rgba(0,0,0,0.05);position:relative;${style}">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
               <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:#555;">${icon} ${label}</span>
-              <span style="font-size:0.75rem;color:var(--cinza);">${new Date(n.date).toLocaleDateString('pt-PT')}</span>
+              <span style="font-size:0.75rem;color:var(--cinza);">${formatDate(n.date)}</span>
             </div>
             <h4 style="margin:4px 0 8px 0;color:#333;">${n.titulo}</h4>
             <p style="margin:0;font-size:0.9rem;color:#555;line-height:1.4;">${n.message}</p>
