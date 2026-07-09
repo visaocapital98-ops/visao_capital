@@ -1134,6 +1134,25 @@ const formatDate = (dateStr) => {
   return isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-PT');
 };
 
+function openModal(html) {
+  const overlay = document.getElementById('modalOverlay');
+  const content = document.getElementById('modalContent');
+  if (overlay && content) {
+    content.innerHTML = html;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeModal(e) {
+  if (e) e.stopPropagation();
+  const overlay = document.getElementById('modalOverlay');
+  if (overlay) {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+}
+
 // ==============================
 // STATE / DATA CACHE
 // ==============================
@@ -1665,6 +1684,11 @@ async function renderAffiliateDashboard() {
       return;
     }
     const data = await res.json();
+    if (data.error) {
+      showToast(data.error, 'error');
+      logoutAffiliate();
+      return;
+    }
     const af = data.profile;
     currentAffiliate = af;
 
