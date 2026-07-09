@@ -438,6 +438,23 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 </head>
 <body>
 
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <defs>
+    <!-- Modern cyber tech gradient matching the green brand identity -->
+    <linearGradient id="cyberGreenGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#052e16" />
+      <stop offset="30%" stop-color="#15803d" />
+      <stop offset="70%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#4ade80" />
+    </linearGradient>
+    
+    <!-- Subtle drop shadow to give depth and the 3D metallic feel of the original logo -->
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+</svg>
+
 <!-- NAV -->
 <nav id="mainNav">
   <div class="nav-logo" style="display:flex;align-items:center;gap:12px;">

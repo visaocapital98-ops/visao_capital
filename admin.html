@@ -387,6 +387,23 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 </head>
 <body>
 
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <defs>
+    <!-- Modern cyber tech gradient matching the green brand identity -->
+    <linearGradient id="cyberGreenGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#052e16" />
+      <stop offset="30%" stop-color="#15803d" />
+      <stop offset="70%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#4ade80" />
+    </linearGradient>
+    
+    <!-- Subtle drop shadow to give depth and the 3D metallic feel of the original logo -->
+    <filter id="logoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+</svg>
+
 <!-- Conteúdo HTML do Admin -->
 <!-- ==================== ADMIN LOGIN ==================== -->
 <div id="page-admin-login" class="page">
@@ -937,6 +954,8 @@ async function initDefaults() {
   }
 }
 
+let currentPage = '';
+
 // Helper para exibição de páginas (login / dashboard)
 function showPage(p) {
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
@@ -945,6 +964,18 @@ function showPage(p) {
     el.classList.add('active');
     window.scrollTo(0, 0);
   }
+  currentPage = p;
+}
+
+// Wrapper seguro para requisições de admin que expiram
+async function adminFetch(url, options = {}) {
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    logoutAdmin();
+    showToast('Sessão expirada. Faça login novamente.', 'error');
+    throw new Error('Sessão expirada');
+  }
+  return res;
 }
 
 // Lógica de scripts do Admin
@@ -1020,7 +1051,7 @@ async function renderTrafficStats() {
   if (!token) return;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/traffic-stats`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/traffic-stats`, {
       headers: Auth.getHeaders(true)
     });
     if (res.status === 401) {
@@ -1101,7 +1132,7 @@ async function renderAdminDashboard() {
   document.getElementById('adminDate').textContent = 'Hoje: ' + new Date().toLocaleDateString('pt-PT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/dashboard`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/dashboard`, {
       headers: Auth.getHeaders(true)
     });
     if (res.status === 401) {
@@ -1140,7 +1171,7 @@ async function renderAdminDashboard() {
 
 async function renderOrders() {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/orders`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/orders`, {
       headers: Auth.getHeaders(true)
     });
     if (res.status === 401) { logoutAdmin(); return; }
@@ -1282,7 +1313,7 @@ async function viewFicheiros(id) {
 
   try {
     // Carregar ficheiros adicionais da API
-    const res = await fetch(`${API_BASE}/api/admin/orders/${id}/files`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/orders/${id}/files`, {
       headers: Auth.getHeaders(true)
     });
     const extraFiles = await res.json();
@@ -1344,7 +1375,7 @@ async function updateOrder(id, newState) {
   if (!o) return;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/orders/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/orders/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1375,7 +1406,7 @@ async function updateOrder(id, newState) {
 async function deleteOrder(id) {
   if (!confirm('Tem a certeza que deseja eliminar este pedido?')) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/orders/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/orders/${id}`, {
       method: 'DELETE',
       headers: Auth.getHeaders(true)
     });
@@ -1425,7 +1456,7 @@ async function saveEditOrder(id) {
   const observacoes = document.getElementById('edit_obs').value;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/orders/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/orders/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1453,7 +1484,7 @@ async function saveEditOrder(id) {
 // ==============================
 async function renderAffiliates() {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/affiliates`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/affiliates`, {
       headers: Auth.getHeaders(true)
     });
     if (res.status === 401) { logoutAdmin(); return; }
@@ -1524,7 +1555,7 @@ function viewAffiliateModal(id) {
 
 async function toggleAffiliate(id, newState) {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/affiliates/${id}/status`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/affiliates/${id}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1545,7 +1576,7 @@ async function toggleAffiliate(id, newState) {
 async function deleteAffiliate(id) {
   if (!confirm('Tem a certeza que deseja eliminar este afiliado?')) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/affiliates/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/affiliates/${id}`, {
       method: 'DELETE',
       headers: Auth.getHeaders(true)
     });
@@ -1564,7 +1595,7 @@ async function deleteAffiliate(id) {
 // ==============================
 async function renderAdminReviews() {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/reviews`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/reviews`, {
       headers: Auth.getHeaders(true)
     });
     if (res.status === 401) { logoutAdmin(); return; }
@@ -1591,7 +1622,7 @@ async function renderAdminReviews() {
 
 async function approveReview(id) {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/reviews/${id}/approve`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/reviews/${id}/approve`, {
       method: 'PUT',
       headers: Auth.getHeaders(true)
     });
@@ -1608,7 +1639,7 @@ async function approveReview(id) {
 async function deleteReview(id) {
   if (!confirm('Tem a certeza que deseja eliminar esta avaliação?')) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/reviews/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/reviews/${id}`, {
       method: 'DELETE',
       headers: Auth.getHeaders(true)
     });
@@ -1671,7 +1702,7 @@ async function saveService(id) {
   const desc = document.getElementById('sv_desc').value;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/services/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/services/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1714,7 +1745,7 @@ async function addService() {
   if (!name || !price || !icon || !desc) { showToast('Preencha todos os campos', 'error'); return; }
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/services`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/services`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1737,7 +1768,7 @@ async function addService() {
 async function deleteService(id) {
   if (!confirm('Tem a certeza que deseja eliminar este serviço?')) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/services/${id}`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/services/${id}`, {
       method: 'DELETE',
       headers: Auth.getHeaders(true)
     });
@@ -1757,7 +1788,7 @@ async function deleteService(id) {
 // ==============================
 async function renderFinances() {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/finances`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/finances`, {
       headers: Auth.getHeaders(true)
     });
     if (res.status === 401) { logoutAdmin(); return; }
@@ -1810,7 +1841,7 @@ async function addExpense() {
   if (!desc || !val) { showToast('Preencha a descrição e o valor', 'error'); return; }
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/expenses`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/expenses`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1832,7 +1863,7 @@ async function addExpense() {
 
 async function payWithdraw(id) {
   try {
-    const res = await fetch(`${API_BASE}/api/admin/withdrawals/${id}/pay`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/withdrawals/${id}/pay`, {
       method: 'PUT',
       headers: Auth.getHeaders(true)
     });
@@ -1849,7 +1880,7 @@ async function payWithdraw(id) {
 async function rejectWithdraw(id) {
   if (!confirm('Rejeitar este pedido de levantamento?')) return;
   try {
-    const res = await fetch(`${API_BASE}/api/admin/withdrawals/${id}/reject`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/withdrawals/${id}/reject`, {
       method: 'PUT',
       headers: Auth.getHeaders(true)
     });
@@ -1887,7 +1918,7 @@ async function updateAdminCredentials() {
   if (pass !== pass2) { showToast('As palavras-passe não coincidem', 'error'); return; }
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/credentials`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/credentials`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1915,7 +1946,7 @@ async function updatePaymentSettings() {
   const paypay_ref = document.getElementById('set_paypay_ref').value;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/settings`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/settings`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1938,7 +1969,7 @@ async function updateContactSettings() {
   const email = document.getElementById('set_email').value;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/settings`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/settings`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1960,7 +1991,7 @@ async function updateCommission() {
   const commission = parseInt(document.getElementById('set_commission').value) || 25;
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/settings`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/settings`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -1988,7 +2019,7 @@ async function sendNotification() {
   if (!msg) { showToast('Escreva uma mensagem', 'error'); return; }
 
   try {
-    const res = await fetch(`${API_BASE}/api/admin/notifications`, {
+    const res = await adminFetch(`${API_BASE}/api/admin/notifications`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
