@@ -34,6 +34,24 @@ Concluímos com sucesso a transição da aplicação estática baseada em `local
   * Criada rota de fallback `GET /uploads/:filename` que, caso o ficheiro não exista fisicamente no disco do contentor do Railway, o recupera automaticamente da base de dados Alwaysdata, grava-o em cache de disco local e serve-o ao utilizador sem qualquer quebra.
 * **Edição de Perfil de Afiliado:** Implementado o modal **"✏️ Editar Perfil"** no painel de afiliado com rota de atualização que permite atualizar dados cadastrais e trocar/submeter a foto de perfil.
 
+### 7. Monitorização de Tráfego e Visitas em Tempo Real 📈 [NOVO]
+* **Visitas Únicas reais:** Implementada a geração de `visitor_id` no localStorage do cliente, garantindo contagens reais e auditadas de utilizadores únicos.
+* **Tempo Real:** Painel administrativo apresenta no topo o número exato de utilizadores ativos que acederam ao site nos últimos 15 minutos (com badge com efeito pulse verde).
+* **Agregações por Período:** Monitorização de tráfego por períodos: *Hoje, Últimos 7 Dias, Este Mês e Este Ano*.
+* **Taxa de Conversão e Métricas:** Exibe dados de quantos entraram no site, quantos apenas visitaram, quantos fizeram pedidos e quantos avaliaram, além de calcular a taxa de conversão real.
+* **Histórico de Tendência:** Tabela com histórico detalhado de visitas, pedidos e conversão dia-a-dia dos últimos 7 dias.
+
+### 8. Painel de Administração Segregado e Privado 🔒 [NOVO]
+* **Segurança:** Todo o código HTML, CSS específico e lógica Javascript administrativa foram **completamente removidos** da página pública [index.html](file:///C:/Users/calei/Documents/GitHub/visao_capital/index.html).
+* **Link Privado:** Criado o ficheiro [admin.html](file:///C:/Users/calei/Documents/GitHub/visao_capital/admin.html) que serve como o ecrã privado de login e gestão do administrador. O acesso agora faz-se de forma oculta através de `https://visao-capital.vercel.app/admin.html`.
+* **Sincronização Absoluta:** Ambos os ficheiros comunicam com a mesma API no Railway e base de dados no Alwaysdata, mantendo as alterações em tempo real perfeitamente integradas.
+
+### 9. Links de Divulgação de Produtos/Serviços de Afiliado (Sem Códigos Manuais) 📦 [NOVO]
+* **Geração Automática de Links:** Aba **"Produtos"** adicionada ao menu lateral do afiliado, listando todos os serviços do site com os respetivos links únicos contendo a referência do afiliado (ex: `https://visao-capital.vercel.app/?ref=VC-ABC123&service=service_id`).
+* **Botão Copiar Inteligente:** Incluído botão de cópia instantânea com feedback visual de sucesso temporário ("✅ Link Copiado!").
+* **Detecção Automática e Redirecionamento:** Quando o utilizador acede com o link de indicação, o site guarda de forma invisível a referência do afiliado no `localStorage` e abre automaticamente o formulário do serviço de destino.
+* **Envio Invisível:** O formulário de solicitação de serviço oculta o campo do código de afiliado caso a referência já exista em cache, preenchendo-o por baixo dos panos na submissão, garantindo 100% de precisão de atribuição sem intervenção manual do cliente.
+
 ---
 
 ## Como Executar Localmente
