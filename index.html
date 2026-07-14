@@ -1259,10 +1259,6 @@ function buildForm(s) {
     <h2>${s.icon} ${s.name}</h2>
     <p class="subtitle">Preencha os dados abaixo para solicitar o serviço</p>
     ${fieldsHTML}
-    <div class="form-group" style="${localStorage.getItem('vc_referrer') ? 'display:none;' : ''}">
-      <label>Código de Afiliado ou Recomendação <span style="color:var(--cinza);font-weight:400;">(opcional)</span></label>
-      <input type="text" id="f_afiliado" value="${localStorage.getItem('vc_referrer') || ''}" placeholder="Ex: VC-ABC123"/>
-    </div>
     <div class="payment-info">
       <h4>💳 Efectue o Pagamento</h4>
       <p style="color:var(--cinza);font-size:.85rem;margin-bottom:12px;">Preço: <strong style="color:var(--verde-escuro);font-size:1.1rem;">${s.price} Kz</strong></p>
@@ -1404,7 +1400,7 @@ async function submitOrder(sid, sname, sprice) {
   const tel = document.getElementById('f_cliente_tel')?.value?.trim();
   const comprFile = document.getElementById('f_comprovativo')?.files?.[0];
   const filesInput = document.getElementById('f_files');
-  const afiliado = document.getElementById('f_afiliado')?.value?.trim() || localStorage.getItem('vc_referrer') || '';
+  const afiliado = localStorage.getItem('vc_referrer') || '';
 
   if (!nome) { showToast('Por favor insira o seu nome', 'error'); return; }
   if (!tel) { showToast('Por favor insira o seu contacto', 'error'); return; }
@@ -2012,7 +2008,7 @@ async function initApp() {
     const targetService = cachedServices.find(s => s.id === serviceId);
     if (targetService) {
       setTimeout(() => {
-        openRequestModal(targetService.id, targetService.name, targetService.price);
+        openServiceForm(targetService.id);
       }, 600);
     }
   }
