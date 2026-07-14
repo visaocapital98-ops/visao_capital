@@ -988,6 +988,7 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
         <a href="javascript:void(0)" class="active" onclick="showAfTab('af-overview')" id="af-menu-overview"><span class="icon">📊</span> Visão Geral</a>
         <a href="javascript:void(0)" onclick="showAfTab('af-sales')" id="af-menu-sales"><span class="icon">🛒</span> Minhas Vendas</a>
         <a href="javascript:void(0)" onclick="showAfTab('af-commission')" id="af-menu-commission"><span class="icon">💰</span> Comissões</a>
+        <a href="javascript:void(0)" onclick="showAfTab('af-products')" id="af-menu-products"><span class="icon">📦</span> Produtos</a>
         <a href="javascript:void(0)" onclick="showAfTab('af-notifications')" id="af-menu-notifications"><span class="icon">🔔</span> Notificações <span id="af_notif_badge" style="display:none;background:#ff4d4d;color:#fff;border-radius:10px;padding:2px 6px;font-size:0.7rem;font-weight:700;margin-left:5px;">0</span></a>
         <a href="javascript:void(0)" onclick="showAfTab('af-profile')" id="af-menu-profile"><span class="icon">👤</span> Meu Perfil</a>
         <a href="javascript:void(0)" onclick="logoutAffiliate()" style="margin-top:auto;color:#ff6b6b;"><span class="icon">🚪</span> Sair</a>
@@ -1069,6 +1070,20 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
           <div class="table-header"><h3>Histórico de Levantamentos</h3></div>
           <table><thead><tr><th>Data</th><th>Valor</th><th>Método</th><th>Estado</th></tr></thead>
           <tbody id="af_withdrawals"></tbody></table>
+        </div>
+      </div>
+      <!-- PRODUCTS -->
+      <div class="tab-panel" id="af-products">
+        <div class="panel-header">
+          <h2>Links de Divulgação (Produtos/Serviços)</h2>
+          <p>Copie os seus links de afiliado personalizados para cada serviço e partilhe-os com os seus clientes.</p>
+        </div>
+        <div class="admin-section">
+          <h3>Lista de Serviços / Produtos</h3>
+          <p style="color:var(--cinza);font-size:0.85rem;margin-bottom:16px;">Sempre que um cliente utilizar estes links, a sua indicação de afiliado será registada de forma 100% automática!</p>
+          <div id="af_products_list" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:16px;">
+            <!-- Carregado via JS -->
+          </div>
         </div>
       </div>
       <!-- PROFILE -->
@@ -1244,9 +1259,9 @@ function buildForm(s) {
     <h2>${s.icon} ${s.name}</h2>
     <p class="subtitle">Preencha os dados abaixo para solicitar o serviço</p>
     ${fieldsHTML}
-    <div class="form-group">
+    <div class="form-group" style="${localStorage.getItem('vc_referrer') ? 'display:none;' : ''}">
       <label>Código de Afiliado ou Recomendação <span style="color:var(--cinza);font-weight:400;">(opcional)</span></label>
-      <input type="text" id="f_afiliado" placeholder="Ex: VC-ABC123"/>
+      <input type="text" id="f_afiliado" value="${localStorage.getItem('vc_referrer') || ''}" placeholder="Ex: VC-ABC123"/>
     </div>
     <div class="payment-info">
       <h4>💳 Efectue o Pagamento</h4>
@@ -1389,7 +1404,7 @@ async function submitOrder(sid, sname, sprice) {
   const tel = document.getElementById('f_cliente_tel')?.value?.trim();
   const comprFile = document.getElementById('f_comprovativo')?.files?.[0];
   const filesInput = document.getElementById('f_files');
-  const afiliado = document.getElementById('f_afiliado')?.value?.trim() || '';
+  const afiliado = document.getElementById('f_afiliado')?.value?.trim() || localStorage.getItem('vc_referrer') || '';
 
   if (!nome) { showToast('Por favor insira o seu nome', 'error'); return; }
   if (!tel) { showToast('Por favor insira o seu contacto', 'error'); return; }
@@ -1667,6 +1682,9 @@ function showAfTab(tab) {
   if (tab === 'af-notifications') {
     loadAffiliateNotifications();
   }
+  if (tab === 'af-products') {
+    renderAffiliateProducts();
+  }
 }
 async function renderAffiliateDashboard() {
   const token = Auth.getAffiliateToken();
@@ -1749,9 +1767,61 @@ async function renderAffiliateDashboard() {
       <div class="setting-row"><span class="setting-label">PayPay</span><span class="setting-val">${af.paypay || 'N/A'}</span></div>
     `;
     loadAffiliateNotifications();
+    renderAffiliateProducts();
   } catch (e) {
     showToast('Erro ao carregar o dashboard', 'error');
   }
+}
+
+function renderAffiliateProducts() {
+  const container = document.getElementById('af_products_list');
+  if (!container || !currentAffiliate) return;
+
+  const refCode = currentAffiliate.code;
+  const baseOrigin = window.location.origin;
+
+  let html = '';
+  cachedServices.forEach(s => {
+    const productLink = `${baseOrigin}/?ref=${refCode}&service=${s.id}`;
+    
+    html += `
+      <div style="background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:1.8rem;">${s.icon || '💼'}</span>
+          <div>
+            <h4 style="margin:0;color:var(--verde-escuro);font-size:1rem;font-weight:700;">${s.name}</h4>
+            <span style="font-size:0.85rem;color:var(--cinza);font-weight:600;">${fmt(s.price)} Kz</span>
+          </div>
+        </div>
+        <p style="margin:0;font-size:0.85rem;color:var(--cinza);flex-grow:1;line-height:1.4;">${s.description || 'Sem descrição.'}</p>
+        
+        <div style="background:#f4f4f4;border-radius:8px;padding:8px 10px;font-family:monospace;font-size:0.8rem;color:#555;word-break:break-all;border:1px solid #eee;">
+          ${productLink}
+        </div>
+        
+        <button class="copy-btn" onclick="copyProductLink('${productLink}', this)" style="margin:0;width:100%;padding:8px 12px;font-size:0.85rem;">
+          📋 Copiar Link Personalizado
+        </button>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html || '<p style="color:var(--cinza);">Nenhum serviço disponível no momento.</p>';
+}
+
+function copyProductLink(link, btn) {
+  navigator.clipboard.writeText(link).then(() => {
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '✅ Link Copiado!';
+    btn.style.background = '#15803d';
+    btn.style.color = '#fff';
+    showToast('Link de afiliado copiado!');
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 2000);
+  });
 }
 
 function copyCode() {
@@ -1928,6 +1998,24 @@ async function initApp() {
 
   await initDefaults();
   renderHomeStats();
+  
+  // Processar parâmetros de afiliado e serviço na URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const ref = urlParams.get('ref');
+  if (ref) {
+    localStorage.setItem('vc_referrer', ref.trim());
+    console.log('Referenciador de afiliado registado:', ref);
+  }
+  
+  const serviceId = urlParams.get('service');
+  if (serviceId) {
+    const targetService = cachedServices.find(s => s.id === serviceId);
+    if (targetService) {
+      setTimeout(() => {
+        openRequestModal(targetService.id, targetService.name, targetService.price);
+      }, 600);
+    }
+  }
   
 
   if (Auth.getAffiliateToken()) {
