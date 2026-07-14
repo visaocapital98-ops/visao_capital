@@ -1149,6 +1149,31 @@ const formatDate = (dateStr) => {
   return isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString('pt-PT');
 };
 
+function fmt(n) {
+  if (!n) return '0';
+  return Math.round(n).toLocaleString('pt-PT');
+}
+
+function parsePrice(val) {
+  if (!val) return 0;
+  const s = String(val).replace(/[^\d.,]/g, '').replace(',', '.');
+  const n = parseFloat(s.replace('.', ''));
+  return isNaN(n) ? 0 : n;
+}
+
+function stateBadge(estado) {
+  const map = {
+    novo: '<span class="badge badge-blue">Novo</span>',
+    pago: '<span class="badge badge-green">Pago</span>',
+    pendente: '<span class="badge badge-yellow">Pendente</span>',
+    concluido: '<span class="badge badge-green">Concluído</span>',
+    ativo: '<span class="badge badge-green">Ativo</span>',
+    suspenso: '<span class="badge badge-red">Suspenso</span>',
+    rejeitado: '<span class="badge badge-red">Rejeitado</span>'
+  };
+  return map[estado] || `<span class="badge">${estado}</span>`;
+}
+
 function openModal(html) {
   const overlay = document.getElementById('modalOverlay');
   const content = document.getElementById('modalContent');
