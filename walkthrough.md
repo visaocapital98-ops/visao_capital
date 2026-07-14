@@ -47,10 +47,10 @@ Concluímos com sucesso a transição da aplicação estática baseada em `local
 * **Sincronização Absoluta:** Ambos os ficheiros comunicam com a mesma API no Railway e base de dados no Alwaysdata, mantendo as alterações em tempo real perfeitamente integradas.
 
 ### 9. Links de Divulgação de Produtos/Serviços de Afiliado (Sem Códigos Manuais) 📦 [NOVO]
-* **Geração Automática de Links:** Aba **"Produtos"** adicionada ao menu lateral do afiliado, listando todos os serviços do site com os respetivos links únicos contendo a referência do afiliado (ex: `https://visao-capital.vercel.app/?ref=VC-ABC123&service=service_id`).
+* **Geração Automática de Links:** Aba **"Produtos"** adicionada ao menu lateral do afiliado, listando todos os serviços do site com os respetivos links únicos contendo o ID do afiliado (ex: `https://visao-capital.vercel.app/?ref=AF1783602073462&service=service_id`).
 * **Botão Copiar Inteligente:** Incluído botão de cópia instantânea com feedback visual de sucesso temporário ("✅ Link Copiado!").
-* **Detecção Automática e Redirecionamento:** Quando o utilizador acede com o link de indicação, o site guarda de forma invisível a referência do afiliado no `localStorage` e abre automaticamente o formulário do serviço de destino.
-* **Envio Invisível:** O formulário de solicitação de serviço oculta o campo do código de afiliado caso a referência já exista em cache, preenchendo-o por baixo dos panos na submissão, garantindo 100% de precisão de atribuição sem intervenção manual do cliente.
+* **Detecção Automática e Redirecionamento:** Quando o utilizador acede com o link de indicação, o site guarda de forma invisível a referência do afiliado (ID) no `localStorage` e abre automaticamente o formulário do serviço de destino.
+* **Envio e Resolução Inteligente:** O formulário de solicitação de serviço descarta totalmente o campo do código de afiliado para o cliente final. Na submissão, a API da base de dados resolve o ID recebido para o código de vendas correspondente do afiliado de forma dinâmica, mantendo as estatísticas e comissões sincronizadas de forma invisível e segura.
 
 ---
 
