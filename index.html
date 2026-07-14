@@ -1773,12 +1773,12 @@ function renderAffiliateProducts() {
   const container = document.getElementById('af_products_list');
   if (!container || !currentAffiliate) return;
 
-  const refCode = currentAffiliate.code;
+  const refId = currentAffiliate.id;
   const baseOrigin = window.location.origin;
 
   let html = '';
   cachedServices.forEach(s => {
-    const productLink = `${baseOrigin}/?ref=${refCode}&service=${s.id}`;
+    const productLink = `${baseOrigin}/?ref=${refId}&service=${s.id}`;
     
     html += `
       <div style="background:#fff;border:1px solid #ddd;border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
