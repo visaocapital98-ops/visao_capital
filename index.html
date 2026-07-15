@@ -1816,12 +1816,8 @@ function renderAffiliateProducts() {
         </div>
         <p style="margin:0;font-size:0.85rem;color:var(--cinza);flex-grow:1;line-height:1.4;">${s.description || 'Sem descrição.'}</p>
         
-        <div style="background:#f4f4f4;border-radius:8px;padding:8px 10px;font-family:monospace;font-size:0.8rem;color:#555;word-break:break-all;border:1px solid #eee;">
-          ${productLink}
-        </div>
-        
-        <button class="copy-btn" onclick="copyProductLink('${productLink}', this)" style="margin:0;width:100%;padding:8px 12px;font-size:0.85rem;">
-          📋 Copiar Link Personalizado
+        <button onclick="copyProductLink('${productLink}', this)" style="margin:0;width:100%;padding:10px 14px;font-size:0.85rem;font-weight:700;background:#22c55e;color:#fff;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s ease;">
+          📋 COPIAR LINK DO PRODUTO
         </button>
       </div>
     `;
@@ -1833,14 +1829,12 @@ function renderAffiliateProducts() {
 function copyProductLink(link, btn) {
   navigator.clipboard.writeText(link).then(() => {
     const originalText = btn.innerHTML;
-    btn.innerHTML = '✅ Link Copiado!';
+    btn.innerHTML = '✅ LINK COPIADO!';
     btn.style.background = '#15803d';
-    btn.style.color = '#fff';
     showToast('Link de afiliado copiado!');
     setTimeout(() => {
       btn.innerHTML = originalText;
-      btn.style.background = '';
-      btn.style.color = '';
+      btn.style.background = '#22c55e';
     }, 2000);
   });
 }
