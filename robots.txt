@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://visao-capital.vercel.app/sitemap.xml
+Sitemap: https://visaocapital.online/sitemap.xml
