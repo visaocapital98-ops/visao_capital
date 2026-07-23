@@ -1429,7 +1429,6 @@ async function submitOrder(sid, sname, sprice) {
   const nome = document.getElementById('f_cliente_nome')?.value?.trim();
   const tel = document.getElementById('f_cliente_tel')?.value?.trim();
   const comprFile = document.getElementById('f_comprovativo')?.files?.[0];
-  const filesInput = document.getElementById('f_files');
   const afiliado = localStorage.getItem('vc_referrer') || '';
 
   if (!nome) { showToast('Por favor insira o seu nome', 'error'); return; }
@@ -1462,10 +1461,15 @@ async function submitOrder(sid, sname, sprice) {
     });
   }
 
-  if (filesInput && filesInput.files.length > 0) {
-    for (let i = 0; i < filesInput.files.length; i++) {
-      formData.append('ficheiros', filesInput.files[i]);
-    }
+  // Recolher todos os ficheiros adicionais anexados (de qualquer campo de ficheiros do formulário)
+  if (formEl) {
+    formEl.querySelectorAll('input[type="file"]').forEach(input => {
+      if (input.id !== 'f_comprovativo' && input.files.length > 0) {
+        for (let i = 0; i < input.files.length; i++) {
+          formData.append('ficheiros', input.files[i]);
+        }
+      }
+    });
   }
 
   try {
