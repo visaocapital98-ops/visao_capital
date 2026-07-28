@@ -751,6 +751,18 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
       <p>Escolha o serviço e preencha o formulário</p>
       <div class="line"></div>
     </div>
+    
+    <!-- CONSULTA DE ESTADO DO DOCUMENTO -->
+    <div style="max-width:600px; margin:0 auto 40px auto; padding:20px; background:#fff; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.05); text-align:center; border:1px solid #eee;">
+      <h3 style="color:var(--verde-escuro); margin-bottom:8px; font-size:1.1rem; display:flex; align-items:center; justify-content:center; gap:8px;">🔍 Estado do meu documento</h3>
+      <p style="color:var(--cinza); font-size:.82rem; margin-bottom:16px;">Insira o código do seu pedido (ex: PD1785237083263) para verificar o estado atual do serviço.</p>
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="statusSearchInput" placeholder="Ex: PD1785237083263" style="flex:1; padding:12px; border:2px solid #e0e0e0; border-radius:8px; font-size:.9rem; font-family:monospace; text-transform:uppercase; outline:none; transition:border-color .2s;"/>
+        <button onclick="checkOrderStatus()" style="background:var(--verde-escuro); color:#fff; padding:0 20px; border:none; border-radius:8px; font-weight:600; cursor:pointer; font-size:.9rem;">Consultar</button>
+      </div>
+      <div id="statusSearchResult" style="display:none; margin-top:20px; border-top:1px solid #eee; padding-top:16px; text-align:left;"></div>
+    </div>
+
     <div class="services-grid" id="servicesGrid"></div>
   </div>
   <footer style="background:var(--preto);color:#fff;text-align:center;padding:20px;">
@@ -1288,51 +1300,71 @@ function buildForm(s) {
   return `
     <h2>${s.icon} ${s.name}</h2>
     <p class="subtitle">Preencha os dados abaixo para solicitar o serviço</p>
-    ${fieldsHTML}
-    <div class="payment-info">
-      <h4>💳 Efectue o Pagamento</h4>
-      <p style="color:var(--cinza);font-size:.85rem;margin-bottom:12px;">Preço: <strong style="color:var(--verde-escuro);font-size:1.1rem;">${s.price} Kz</strong></p>
-      <div class="payment-tab-btns">
-        <button class="ptab-btn active" onclick="showPayTab('bic',this)">🏦 Banco BIC</button>
-        <button class="ptab-btn" onclick="showPayTab('paypay',this)">📱 PayPay</button>
+    
+    <!-- ETAPA 1: DADOS DO FORMULÁRIO -->
+    <div id="step-1-fields">
+      <div class="form-group">
+        <label>Nome do Cliente *</label>
+        <input type="text" id="f_cliente_nome" placeholder="Nome completo"/>
       </div>
-      <div id="pay-bic" class="payment-detail">
-        <strong>Banco BIC</strong><br/>
-        Titular: <strong>${settings.bic_name || 'DOMINGOS DA SILVA CALEI'}</strong><br/>
-        Conta: <strong>${settings.bic_account || '005100005744156310133'}</strong>
+      <div class="form-group">
+        <label>Contacto do Cliente *</label>
+        <input type="text" id="f_cliente_tel" placeholder="Telefone ou email"/>
       </div>
-      <div id="pay-paypay" class="payment-detail" style="display:none;">
-        <strong>PayPay</strong><br/>
-        Nome: <strong>${settings.paypay_name || 'PAULO DE JESUS NICOLAU CALEI'}</strong><br/>
-        Entidade: <strong>${settings.paypay_entity || '10116'}</strong><br/>
-        Referência: <strong>${settings.paypay_ref || '936410545'}</strong>
+      ${fieldsHTML}
+      <button class="submit-btn" type="button" onclick="goToStep2()" style="margin-top:20px;">Seguinte ➔</button>
+    </div>
+
+    <!-- ETAPA 2: PAGAMENTO E COMPROVATIVO -->
+    <div id="step-2-payment" style="display:none;">
+      <div class="payment-info">
+        <h4>💳 Efectue o Pagamento</h4>
+        <p style="color:var(--cinza);font-size:.85rem;margin-bottom:12px;">Preço: <strong style="color:var(--verde-escuro);font-size:1.1rem;">${s.price} Kz</strong></p>
+        <div class="payment-tab-btns">
+          <button class="ptab-btn active" type="button" onclick="showPayTab('bic',this)">🏦 Banco BIC</button>
+          <button class="ptab-btn" type="button" onclick="showPayTab('paypay',this)">📱 PayPay</button>
+        </div>
+        <div id="pay-bic" class="payment-detail">
+          <strong>Banco BIC</strong><br/>
+          Titular: <strong>${settings.bic_name || 'DOMINGOS DA SILVA CALEI'}</strong><br/>
+          Conta: <strong>${settings.bic_account || '005100005744156310133'}</strong>
+        </div>
+        <div id="pay-paypay" class="payment-detail" style="display:none;">
+          <strong>PayPay</strong><br/>
+          Nome: <strong>${settings.paypay_name || 'PAULO DE JESUS NICOLAU CALEI'}</strong><br/>
+          Entidade: <strong>${settings.paypay_entity || '10116'}</strong><br/>
+          Referência: <strong>${settings.paypay_ref || '936410545'}</strong>
+        </div>
+      </div>
+
+      <!-- AVISO IMPORTANTE DE PAGAMENTO -->
+      <div style="background:#fff3cd; color:#856404; border:1px solid #ffeeba; border-radius:8px; padding:12px; margin:16px 0; font-size:.88rem; font-weight:600; line-height:1.4;">
+        ⚠️ Aviso: Se o pagamento não for devidamente comprovado, o trabalho não será executado.
+      </div>
+
+      <div class="form-group">
+        <label>Upload do Comprovativo de Pagamento *</label>
+        <div class="upload-area" onclick="document.getElementById('f_comprovativo').click()" id="compUploadArea">
+          <div class="upload-icon">📎</div>
+          <p><strong>Clique para fazer upload</strong> – JPG, PNG, PDF (máx. 10MB)</p>
+          <p style="font-size:.8rem;color:var(--cinza);">Upload obrigatório – sem comprovativo o pedido não pode ser concluído</p>
+          <input type="file" id="f_comprovativo" accept="image/*,.pdf" style="display:none" onchange="handleComprUpload(this)"/>
+          <p id="compr_name" style="color:var(--verde-escuro);font-weight:600;margin-top:6px;"></p>
+        </div>
+        <div class="comprovativo-box" id="comprBox" style="display:none;">
+          <strong>✅ Comprovativo carregado!</strong><br/>
+          Envie também o comprovativo para:<br/>
+          📱 <strong>WhatsApp: ${settings.whatsapp || '959519835'}</strong><br/>
+          ou 📧 <strong>Email: ${settings.email || 'visaocapital98@gmail.com'}</strong>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-top:20px;">
+        <button class="submit-btn" type="button" onclick="goToStep1()" style="background:#e0e0e0; color:#333; margin:0; flex:1;">← Voltar</button>
+        <button class="submit-btn" type="button" onclick="confirmAndSubmit('${s.id}','${s.name}','${s.price}')" style="margin:0; flex:2;">🏁 Concluir Pedido</button>
       </div>
     </div>
-    <div class="form-group">
-      <label>Upload do Comprovativo de Pagamento *</label>
-      <div class="upload-area" onclick="document.getElementById('f_comprovativo').click()" id="compUploadArea">
-        <div class="upload-icon">📎</div>
-        <p><strong>Clique para fazer upload</strong> – JPG, PNG, PDF (máx. 10MB)</p>
-        <p style="font-size:.8rem;color:var(--cinza);">Upload obrigatório – sem comprovativo o pedido não pode ser concluído</p>
-        <input type="file" id="f_comprovativo" accept="image/*,.pdf" style="display:none" onchange="handleComprUpload(this)"/>
-        <p id="compr_name" style="color:var(--verde-escuro);font-weight:600;margin-top:6px;"></p>
-      </div>
-      <div class="comprovativo-box" id="comprBox" style="display:none;">
-        <strong>✅ Comprovativo carregado!</strong><br/>
-        Envie também o comprovativo para:<br/>
-        📱 <strong>WhatsApp: ${settings.whatsapp || '959519835'}</strong><br/>
-        ou 📧 <strong>Email: ${settings.email || 'visaocapital98@gmail.com'}</strong>
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Nome do Cliente *</label>
-      <input type="text" id="f_cliente_nome" placeholder="Nome completo"/>
-    </div>
-    <div class="form-group">
-      <label>Contacto do Cliente *</label>
-      <input type="text" id="f_cliente_tel" placeholder="Telefone ou email"/>
-    </div>
-    <button class="submit-btn" onclick="submitOrder('${s.id}','${s.name}','${s.price}')">✅ Enviar Pedido</button>
+
     <input type="hidden" id="f_service_id" value="${s.id}"/>
     <input type="hidden" id="f_service_name" value="${s.name}"/>
   `;
@@ -1422,6 +1454,120 @@ function handleComprUpload(input) {
     name.textContent = '✅ ' + input.files[0].name;
     box.style.display = 'block';
     area.classList.add('has-file');
+  }
+}
+
+function validateStep1() {
+  const nome = document.getElementById('f_cliente_nome')?.value?.trim();
+  const tel = document.getElementById('f_cliente_tel')?.value?.trim();
+  if (!nome) { showToast('Por favor insira o seu nome', 'error'); return false; }
+  if (!tel) { showToast('Por favor insira o seu contacto', 'error'); return false; }
+
+  let valid = true;
+  const formEl = document.getElementById('requestFormCard');
+  if (formEl) {
+    formEl.querySelectorAll('.form-group').forEach(group => {
+      const label = group.querySelector('label');
+      if (label && label.textContent.includes('*')) {
+        const input = group.querySelector('input, select, textarea');
+        if (input && input.id !== 'f_comprovativo' && input.id !== 'f_cliente_nome' && input.id !== 'f_cliente_tel') {
+          if (input.type === 'file') {
+            if (input.files.length === 0) {
+              showToast(`Por favor preencha o campo: ${label.textContent.replace('*', '').trim()}`, 'error');
+              valid = false;
+            }
+          } else {
+            if (!input.value || input.value.trim() === '') {
+              showToast(`Por favor preencha o campo: ${label.textContent.replace('*', '').trim()}`, 'error');
+              valid = false;
+            }
+          }
+        }
+      }
+    });
+  }
+  return valid;
+}
+
+function goToStep2() {
+  if (validateStep1()) {
+    document.getElementById('step-1-fields').style.display = 'none';
+    document.getElementById('step-2-payment').style.display = 'block';
+    document.getElementById('requestFormCard').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function goToStep1() {
+  document.getElementById('step-2-payment').style.display = 'none';
+  document.getElementById('step-1-fields').style.display = 'block';
+  document.getElementById('requestFormCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function confirmAndSubmit(sid, sname, sprice) {
+  const comprFile = document.getElementById('f_comprovativo')?.files?.[0];
+  if (!comprFile) {
+    showToast('Por favor faça upload do comprovativo de pagamento', 'error');
+    return;
+  }
+  if (confirm('Tens a certeza de que anexaste o comprovativo de pagamento correto?')) {
+    submitOrder(sid, sname, sprice);
+  }
+}
+
+async function checkOrderStatus() {
+  const code = document.getElementById('statusSearchInput')?.value?.trim();
+  const resultDiv = document.getElementById('statusSearchResult');
+  if (!code) {
+    showToast('Por favor insira o código do seu pedido', 'error');
+    return;
+  }
+
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = `<div style="text-align:center;color:var(--cinza);font-size:.9rem;padding:10px;">🔍 A pesquisar pedido...</div>`;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/orders/${code}/status`);
+    if (!res.ok) {
+      if (res.status === 404) {
+        resultDiv.innerHTML = `
+          <div style="background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; border-radius:8px; padding:12px; font-size:.9rem; font-weight:600; text-align:center;">
+            ❌ Código de pedido não encontrado. Verifique se digitou corretamente.
+          </div>`;
+      } else {
+        throw new Error('Erro na consulta');
+      }
+      return;
+    }
+
+    const data = await res.json();
+    
+    const badgeMap = {
+      novo: '<span class="badge" style="background:#007bff;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;">Novo</span>',
+      pago: '<span class="badge" style="background:#28a745;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;">Pago</span>',
+      execucao: '<span class="badge" style="background:#e67e22;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;">A ser executado</span>',
+      pendente: '<span class="badge" style="background:#ffc107;color:#212529;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;">Pendente</span>',
+      concluido: '<span class="badge" style="background:#28a745;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;">Concluído</span>'
+    };
+
+    const statusBadgeHTML = badgeMap[data.estado] || `<span class="badge" style="background:#6c757d;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.8rem;font-weight:600;">${data.estado}</span>`;
+
+    resultDiv.innerHTML = `
+      <div style="background:#f1f3f5; border:1px solid #e9ecef; border-radius:8px; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-weight:700; color:#333; font-size:.95rem;">Pedido: <span style="font-family:monospace; color:var(--verde-escuro);">${data.id}</span></span>
+          ${statusBadgeHTML}
+        </div>
+        <div style="font-size:.88rem; color:#495057; line-height:1.5;">
+          <strong>Cliente:</strong> ${data.cliente}<br/>
+          <strong>Serviço solicitado:</strong> ${data.servico}
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    resultDiv.innerHTML = `
+      <div style="background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; border-radius:8px; padding:12px; font-size:.9rem; font-weight:600; text-align:center;">
+        ❌ Ocorreu um erro ao consultar o estado. Tente novamente mais tarde.
+      </div>`;
   }
 }
 
