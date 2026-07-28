@@ -755,6 +755,11 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
           <button class="submit-btn" onclick="updateCommission()" style="max-width:200px;">💾 Guardar</button>
         </div>
         <div class="admin-section">
+          <h3>🔗 Webhook de Notificações</h3>
+          <div class="form-group"><label>URL do Webhook (para receber alertas em apps externas)</label><input type="url" id="set_webhook_url" placeholder="https://exemplo.com/webhook"/></div>
+          <button class="submit-btn" onclick="updateWebhookSettings()" style="max-width:200px;">💾 Guardar Webhook</button>
+        </div>
+        <div class="admin-section">
           <h3>🔔 Enviar Notificação a Afiliados</h3>
           <div class="form-group">
             <label>Título da Notificação</label>
@@ -1911,6 +1916,7 @@ function loadSettingsForm() {
   setVal('set_whatsapp', s.whatsapp);
   setVal('set_email', s.email);
   setVal('set_commission', s.commission || 25);
+  setVal('set_webhook_url', s.webhook_url);
 }
 
 async function loadAffiliatesDropdown() {
@@ -2029,6 +2035,28 @@ async function updateCommission() {
     await initDefaults();
   } catch (e) {
     showToast('Erro ao guardar comissão', 'error');
+  }
+}
+
+async function updateWebhookSettings() {
+  const webhook_url = document.getElementById('set_webhook_url').value.trim();
+
+  try {
+    const res = await adminFetch(`${API_BASE}/api/admin/settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...Auth.getHeaders(true)
+      },
+      body: JSON.stringify({ webhook_url })
+    });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); return; }
+
+    showToast('URL do Webhook guardado com sucesso!', 'success');
+    await initDefaults();
+  } catch (e) {
+    showToast('Erro ao guardar webhook', 'error');
   }
 }
 
