@@ -624,6 +624,7 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
           <button class="tab-btn active" onclick="filterOrders('all',this)">Todos</button>
           <button class="tab-btn" onclick="filterOrders('novo',this)">Novos</button>
           <button class="tab-btn" onclick="filterOrders('pago',this)">Pagos</button>
+          <button class="tab-btn" onclick="filterOrders('execucao',this)">Em Execução</button>
           <button class="tab-btn" onclick="filterOrders('pendente',this)">Pendentes</button>
           <button class="tab-btn" onclick="filterOrders('concluido',this)">Concluídos</button>
         </div>
@@ -1285,7 +1286,8 @@ function orderActions(o) {
   btns += `<button class="action-btn" style="background:#fff3cd;color:#856404;" onclick="viewOrderDetails('${o.id}')">📝 Detalhes</button>`;
   
   if (o.estado === 'novo') btns += `<button class="action-btn btn-approve" onclick="updateOrder('${o.id}','pago')">✅ Aprovar</button>`;
-  if (o.estado === 'pago') btns += `<button class="action-btn btn-complete" onclick="updateOrder('${o.id}','concluido')">🏁 Concluir</button>`;
+  if (o.estado === 'pago') btns += `<button class="action-btn" style="background:#e67e22;color:#fff;" onclick="updateOrder('${o.id}','execucao')">⚙️ Executar</button>`;
+  if (o.estado === 'execucao') btns += `<button class="action-btn btn-complete" onclick="updateOrder('${o.id}','concluido')">🏁 Concluir</button>`;
   if (o.estado !== 'concluido') btns += `<button class="action-btn btn-suspend" onclick="updateOrder('${o.id}','pendente')">⏳ Pendente</button>`;
   btns += `<button class="action-btn btn-edit" onclick="editOrderModal('${o.id}')">✏️</button>`;
   btns += `<button class="action-btn btn-delete" onclick="deleteOrder('${o.id}')">🗑️</button>`;
@@ -1436,6 +1438,7 @@ function editOrderModal(id) {
       <select id="edit_estado">
         <option value="novo" ${o.estado === 'novo' ? 'selected' : ''}>Novo</option>
         <option value="pago" ${o.estado === 'pago' ? 'selected' : ''}>Pago</option>
+        <option value="execucao" ${o.estado === 'execucao' ? 'selected' : ''}>A ser executado</option>
         <option value="pendente" ${o.estado === 'pendente' ? 'selected' : ''}>Pendente</option>
         <option value="concluido" ${o.estado === 'concluido' ? 'selected' : ''}>Concluído</option>
       </select>
@@ -2083,6 +2086,7 @@ function stateBadge(estado) {
   const map = {
     novo: '<span class="badge badge-blue">Novo</span>',
     pago: '<span class="badge badge-green">Pago</span>',
+    execucao: '<span class="badge" style="background:#e67e22;color:#fff;padding:4px 8px;border-radius:4px;font-size:0.75rem;font-weight:600;">A ser executado</span>',
     pendente: '<span class="badge badge-yellow">Pendente</span>',
     concluido: '<span class="badge badge-green">Concluído</span>',
     ativo: '<span class="badge badge-green">Ativo</span>',
