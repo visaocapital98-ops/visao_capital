@@ -757,7 +757,10 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
         <div class="admin-section">
           <h3>🔗 Webhook de Notificações</h3>
           <div class="form-group"><label>URL do Webhook (para receber alertas em apps externas)</label><input type="url" id="set_webhook_url" placeholder="https://exemplo.com/webhook"/></div>
-          <button class="submit-btn" onclick="updateWebhookSettings()" style="max-width:200px;">💾 Guardar Webhook</button>
+          <div style="display:flex; gap:12px;">
+            <button class="submit-btn" onclick="updateWebhookSettings()" style="max-width:200px; margin:0;">💾 Guardar Webhook</button>
+            <button class="submit-btn" onclick="testWebhook()" style="max-width:180px; margin:0; background:#17a2b8;">⚡ Testar Webhook</button>
+          </div>
         </div>
         <div class="admin-section">
           <h3>🔔 Enviar Notificação a Afiliados</h3>
@@ -2057,6 +2060,30 @@ async function updateWebhookSettings() {
     await initDefaults();
   } catch (e) {
     showToast('Erro ao guardar webhook', 'error');
+  }
+}
+
+async function testWebhook() {
+  showToast('A enviar evento de teste...', 'success');
+
+  try {
+    const res = await adminFetch(`${API_BASE}/api/admin/settings/test-webhook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...Auth.getHeaders(true)
+      }
+    });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); return; }
+
+    if (data.success) {
+      showToast(`✅ Webhook disparado com sucesso! Resposta: ${data.status} ${data.statusText || 'OK'}`, 'success');
+    } else {
+      showToast(`❌ Falha no webhook. Resposta: ${data.status} ${data.statusText || 'Error'}`, 'error');
+    }
+  } catch (e) {
+    showToast('Erro ao testar webhook. Verifique as credenciais ou a URL.', 'error');
   }
 }
 
