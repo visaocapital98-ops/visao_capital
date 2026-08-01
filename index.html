@@ -2223,42 +2223,6 @@ async function downloadAffiliatePhoto(url, filename) {
   }
 }
 
-// Renderizar ranking de afiliados no painel admin
-async function renderAffiliateRanking() {
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/affiliates/ranking`, {
-      headers: Auth.getHeaders(true)
-    });
-    const ranking = await res.json();
-    
-    document.getElementById('adm_affiliates_ranking_table').innerHTML = ranking.map((a, i) => {
-      let positionBadge = '';
-      if (i === 0) positionBadge = '🥇';
-      else if (i === 1) positionBadge = '🥈';
-      else if (i === 2) positionBadge = '🥉';
-      else positionBadge = `#${i + 1}`;
-
-      return `
-        <tr>
-          <td><strong style="font-size:1.1rem;">${positionBadge}</strong></td>
-          <td>
-            <div style="display:flex;align-items:center;gap:8px;">
-              ${a.foto_path ? `<img src="${API_BASE}${a.foto_path}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;"/>` : `<div style="width:30px;height:30px;border-radius:50%;background:var(--verde-escuro);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;">${a.nome[0]}</div>`}
-              <strong>${a.nome}</strong>
-            </div>
-          </td>
-          <td><span class="badge badge-blue" style="font-family:monospace;">${a.code}</span></td>
-          <td><strong>${a.totalSales}</strong></td>
-          <td>${fmt(a.totalRevenue || 0)} Kz</td>
-          <td><strong style="color:var(--verde-escuro);">${fmt(a.commission || 0)} Kz</strong></td>
-        </tr>
-      `;
-    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--cinza);padding:20px;">Nenhum ranking disponível</td></tr>';
-  } catch (e) {
-    console.error('Erro ao carregar ranking:', e);
-  }
-}
-
 // Carregar notificações do afiliado no dashboard
 async function loadAffiliateNotifications() {
   try {
