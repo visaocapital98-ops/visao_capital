@@ -1208,7 +1208,7 @@ async function renderOrders() {
       <tr>
         <td><strong>#${i + 1}</strong></td><td>${new Date(o.date).toLocaleDateString('pt-PT')}</td>
         <td><strong>${o.cliente}</strong><br/><span style="color:var(--cinza);font-size:.8rem;">${o.contacto || ''}</span></td>
-        <td>${o.servico}</td><td><strong>${o.valor} Kz</strong></td>
+        <td>${o.servico}</td><td><strong>${o.valor} Kz</strong>${o.ref_transacao ? `<br/><span style="color:#7d6608;background:#fcf3cf;padding:1px 4px;border-radius:3px;font-size:0.75rem;font-weight:600;font-family:monospace;display:inline-block;margin-top:4px;">Ref: ${o.ref_transacao}</span>` : ''}</td>
         <td>${o.afiliado ? `<span class="badge badge-blue">${o.afiliado}</span>` : '–'}</td>
         <td>${stateBadge(o.estado)}</td>
         <td style="white-space:nowrap;">${orderActions(o)}</td>
@@ -1309,6 +1309,11 @@ function viewComprovativo(id) {
   openModal(`
     <h3>🧾 Comprovativo de Pagamento</h3>
     <p style="color:var(--cinza);font-size:.85rem;margin-bottom:12px;">Pedido: <strong>${o.id}</strong> | Cliente: <strong>${o.cliente}</strong></p>
+    ${o.ref_transacao ? `
+      <div style="background:#fcf3cf; border:1px solid #ffeeba; border-radius:8px; padding:10px; margin-bottom:12px; font-size:.9rem; color:#7d6608;">
+        <strong>🔑 Referência/Transação Informada:</strong> <span style="font-family:monospace; font-weight:700; font-size:1rem; background:#fff; padding:2px 6px; border-radius:4px; border:1px solid #ddd;">${o.ref_transacao}</span>
+      </div>
+    ` : ''}
     ${isImg
       ? `<img src="${API_BASE}${o.comprovativo_path}" style="width:100%;max-height:400px;object-fit:contain;border-radius:8px;border:1px solid #ddd;"/>`
       : `<div style="text-align:center;padding:24px;"><p style="margin-bottom:12px;">📄 ${o.comprovativo_name || 'comprovativo.pdf'}</p><a href="${API_BASE}${o.comprovativo_path}" download="${o.comprovativo_name || 'comprovativo'}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:12px 24px;border-radius:8px;font-weight:700;display:inline-block;">📥 Abrir / Descarregar</a></div>`
@@ -1335,6 +1340,11 @@ async function viewFicheiros(id) {
       comprHTML = `
         <div style="border:2px solid #c3e6c3;border-radius:10px;padding:14px;background:#f0fff0;">
           <div style="font-weight:700;color:var(--verde-escuro);margin-bottom:10px;">🧾 Comprovativo de Pagamento</div>
+          ${o.ref_transacao ? `
+            <div style="background:#fcf3cf; border:1px solid #ffeeba; border-radius:6px; padding:8px; margin-bottom:12px; font-size:.85rem; color:#7d6608;">
+              <strong>🔑 Referência/Transação:</strong> <span style="font-family:monospace; font-weight:700; font-size:0.95rem; background:#fff; padding:2px 6px; border-radius:4px; border:1px solid #ddd;">${o.ref_transacao}</span>
+            </div>
+          ` : ''}
           ${isImg
             ? `<img src="${API_BASE}${o.comprovativo_path}" style="width:100%;max-height:350px;object-fit:contain;border-radius:8px;border:1px solid #ddd;"/>`
             : `<div style="text-align:center;padding:16px;"><p style="margin-bottom:10px;">📄 ${o.comprovativo_name || 'comprovativo.pdf'}</p><a href="${API_BASE}${o.comprovativo_path}" download="${o.comprovativo_name || 'comprovativo'}" target="_blank" style="background:var(--verde-escuro);color:#fff;padding:10px 22px;border-radius:8px;font-weight:700;display:inline-block;">📥 Abrir / Descarregar</a></div>`
