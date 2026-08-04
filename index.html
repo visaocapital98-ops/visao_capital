@@ -1342,6 +1342,29 @@ function buildForm(s) {
         ⚠️ Aviso: Se o pagamento não for devidamente comprovado, o trabalho não será executado.
       </div>
 
+      <!-- Exemplo de Comprovativo Aceitável (Guia Visual) -->
+      <div style="background:#eaf2f8; border:1px solid #a9cce3; border-radius:8px; padding:12px; margin-bottom:16px;">
+        <h5 style="margin:0 0 6px 0; color:#1b4f72; font-size:0.9rem; font-weight:700; display:flex; align-items:center; gap:6px;">
+          ℹ️ Guia de Envio de Comprovativo
+        </h5>
+        <p style="margin:0 0 10px 0; font-size:0.8rem; color:#2c3e50;">Certifique-se de que o seu comprovativo contém as informações marcadas no exemplo abaixo:</p>
+        <div style="background:#fff; border:1px dashed #7fb3d5; border-radius:6px; padding:10px; font-family:monospace; font-size:0.75rem; color:#34495e; position:relative; max-width:280px; margin:0 auto; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
+          <div style="text-align:center; font-weight:bold; border-bottom:1px solid #eee; padding-bottom:6px; margin-bottom:6px;">TALÃO DE TRANSFERÊNCIA</div>
+          DE: CLIENTE EXEMPLO<br/>
+          PARA: VISÃO CAPITAL<br/>
+          CONTA: AO06 0051 ... 133<br/>
+          <div style="background:#d4efdf; border:1px solid #27ae60; padding:2px 4px; display:inline-block; font-weight:bold; color:#196f3d; margin:4px 0; position:relative; border-radius:3px;">
+            VALOR: ${s.price} Kz
+            <span style="position:absolute; left:105%; top:0; background:#27ae60; color:#fff; font-size:0.6rem; padding:1px 4px; border-radius:3px; white-space:nowrap; font-family:sans-serif;">← Valor correto</span>
+          </div><br/>
+          DATA: ${new Date().toLocaleDateString('pt-PT')}<br/>
+          <div style="background:#fcf3cf; border:1px solid #f1c40f; padding:2px 4px; display:inline-block; font-weight:bold; color:#7d6608; margin:4px 0; position:relative; border-radius:3px;">
+            REF/TRANS: 985710293
+            <span style="position:absolute; left:105%; top:0; background:#f1c40f; color:#000; font-size:0.6rem; padding:1px 4px; border-radius:3px; white-space:nowrap; font-family:sans-serif;">← Copie este número</span>
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Upload do Comprovativo de Pagamento *</label>
         <div class="upload-area" onclick="document.getElementById('f_comprovativo').click()" id="compUploadArea">
@@ -1351,12 +1374,34 @@ function buildForm(s) {
           <input type="file" id="f_comprovativo" accept="image/*,.pdf" style="display:none" onchange="handleComprUpload(this)"/>
           <p id="compr_name" style="color:var(--verde-escuro);font-weight:600;margin-top:6px;"></p>
         </div>
+        
+        <!-- Painel de Pré-visualização Interativo -->
+        <div id="comprPreviewContainer" style="display:none; margin-top:12px; border:1px solid #ddd; border-radius:8px; padding:10px; background:#f8f9fa; text-align:center;">
+          <p style="font-size:0.8rem; font-weight:bold; color:var(--escuro); margin-bottom:8px;">🔍 Pré-visualização do Ficheiro:</p>
+          <div id="comprPreviewEl" style="max-height:220px; overflow:hidden; display:flex; align-items:center; justify-content:center; border-radius:6px; border:1px solid #eee; background:#fff;"></div>
+        </div>
+
         <div class="comprovativo-box" id="comprBox" style="display:none;">
           <strong>✅ Comprovativo carregado!</strong><br/>
           Envie também o comprovativo para:<br/>
           📱 <strong>WhatsApp: ${settings.whatsapp || '959519835'}</strong><br/>
           ou 📧 <strong>Email: ${settings.email || 'visaocapital98@gmail.com'}</strong>
         </div>
+      </div>
+
+      <!-- NÚMERO DE REFERÊNCIA / TRANSAÇÃO -->
+      <div class="form-group" style="margin-top:20px;">
+        <label>Número de Referência / Transação *</label>
+        <input type="text" id="f_ref_transacao" placeholder="Ex: Ref: 985710293 ou ID do PayPay" style="width:100%;" required />
+        <p style="font-size:0.8rem; color:var(--cinza); margin-top:4px;">Insira o código numérico de transação ou referência do talão de pagamento.</p>
+      </div>
+
+      <!-- CHECKBOX DE CONFIRMAÇÃO OBRIGATÓRIA -->
+      <div style="margin:20px 0; display:flex; align-items:start; gap:10px; background:#f4f6f7; border-radius:8px; padding:12px; border:1px solid #e2e4e6;">
+        <input type="checkbox" id="f_confirm_details" style="margin-top:3px; transform:scale(1.2); cursor:pointer;" required />
+        <label for="f_confirm_details" style="font-size:0.85rem; line-height:1.45; color:#2c3e50; cursor:pointer; font-weight:600; user-select:none;">
+          Confirmo que o ficheiro anexado é um comprovativo de pagamento legítimo e válido enviado para a Visão Capital no valor de ${s.price} Kz e que a referência digitada acima está correta.
+        </label>
       </div>
 
       <div style="display:flex; gap:12px; margin-top:20px;">
@@ -1450,10 +1495,50 @@ function handleComprUpload(input) {
   const name = document.getElementById('compr_name');
   const box = document.getElementById('comprBox');
   const area = document.getElementById('compUploadArea');
+  const previewContainer = document.getElementById('comprPreviewContainer');
+  const previewEl = document.getElementById('comprPreviewEl');
+  
   if (input.files.length > 0) {
-    name.textContent = '✅ ' + input.files[0].name;
+    const file = input.files[0];
+    name.textContent = '✅ ' + file.name;
     box.style.display = 'block';
     area.classList.add('has-file');
+
+    // Pré-visualização do ficheiro
+    if (previewContainer && previewEl) {
+      previewContainer.style.display = 'block';
+      previewEl.innerHTML = ''; // Limpar anterior
+
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '200px';
+        img.style.objectFit = 'contain';
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+        previewEl.appendChild(img);
+      } else if (file.type === 'application/pdf') {
+        previewEl.innerHTML = `
+          <div style="padding:16px; text-align:center; color:#c0392b;">
+            <span style="font-size:2.5rem; display:block; margin-bottom:6px;">📕</span>
+            <span style="font-size:0.85rem; font-weight:600; color:#333;">Ficheiro PDF: ${file.name}</span>
+          </div>
+        `;
+      } else {
+        previewEl.innerHTML = `
+          <div style="padding:16px; text-align:center; color:#7f8c8d;">
+            <span style="font-size:2.5rem; display:block; margin-bottom:6px;">📁</span>
+            <span style="font-size:0.85rem; font-weight:600; color:#333;">Outro Ficheiro: ${file.name}</span>
+          </div>
+        `;
+      }
+    }
+  } else {
+    if (previewContainer) previewContainer.style.display = 'none';
   }
 }
 
@@ -1509,6 +1594,19 @@ function confirmAndSubmit(sid, sname, sprice) {
     showToast('Por favor faça upload do comprovativo de pagamento', 'error');
     return;
   }
+
+  const ref = document.getElementById('f_ref_transacao')?.value?.trim();
+  if (!ref || ref.length < 3) {
+    showToast('Por favor insira o número de referência ou transação do pagamento', 'error');
+    return;
+  }
+
+  const confirmChk = document.getElementById('f_confirm_details');
+  if (!confirmChk || !confirmChk.checked) {
+    showToast('Por favor confirme os dados do comprovativo marcando a caixa de seleção', 'error');
+    return;
+  }
+
   if (confirm('Tens a certeza de que anexaste o comprovativo de pagamento correto?')) {
     submitOrder(sid, sname, sprice);
   }
@@ -1575,11 +1673,13 @@ async function submitOrder(sid, sname, sprice) {
   const nome = document.getElementById('f_cliente_nome')?.value?.trim();
   const tel = document.getElementById('f_cliente_tel')?.value?.trim();
   const comprFile = document.getElementById('f_comprovativo')?.files?.[0];
+  const ref = document.getElementById('f_ref_transacao')?.value?.trim();
   const afiliado = localStorage.getItem('vc_referrer') || '';
-
+ 
   if (!nome) { showToast('Por favor insira o seu nome', 'error'); return; }
   if (!tel) { showToast('Por favor insira o seu contacto', 'error'); return; }
   if (!comprFile) { showToast('Por favor faça upload do comprovativo de pagamento', 'error'); return; }
+  if (!ref || ref.length < 3) { showToast('Por favor insira o número de referência/transação do pagamento', 'error'); return; }
 
   const formData = new FormData();
   formData.append('cliente_nome', nome);
@@ -1589,6 +1689,7 @@ async function submitOrder(sid, sname, sprice) {
   formData.append('valor', sprice);
   formData.append('afiliado', afiliado);
   formData.append('comprovativo', comprFile);
+  formData.append('ref_transacao', ref);
   if (typeof visitorId !== 'undefined' && visitorId) {
     formData.append('visitor_id', visitorId);
   }
@@ -1600,7 +1701,7 @@ async function submitOrder(sid, sname, sprice) {
       const key = el.id;
       // Excluir campos já enviados separadamente ou de controlo
       const excluir = ['f_cliente_nome','f_cliente_tel','f_comprovativo','f_files','f_afiliado',
-                        'f_certs','f_anexo','f_service_id','f_service_name'];
+                        'f_certs','f_anexo','f_service_id','f_service_name','f_ref_transacao','f_confirm_details'];
       if (!excluir.includes(key) && el.value && el.value.trim() !== '') {
         formData.append(key, el.value.trim());
       }
