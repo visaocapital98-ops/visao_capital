@@ -1549,7 +1549,7 @@ function validateStep1() {
   if (!tel) { showToast('Por favor insira o seu contacto', 'error'); return false; }
 
   let valid = true;
-  const formEl = document.getElementById('requestFormCard');
+  const formEl = document.getElementById('step-1-fields');
   if (formEl) {
     formEl.querySelectorAll('.form-group').forEach(group => {
       const label = group.querySelector('label');
