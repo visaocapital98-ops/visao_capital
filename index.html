@@ -1759,8 +1759,11 @@ async function renderHomeStats() {
     const resStats = await fetch(`${API_BASE}/api/stats/public`);
     const stats = await resStats.json();
     
-    animateNum('statClients', stats.completed);
-    animateNum('statOrders', stats.total);
+    const BASE_CLIENTS = 219;
+    const BASE_ORDERS  = 405;
+
+    animateNum('statClients', BASE_CLIENTS + (stats.completed || 0));
+    animateNum('statOrders',  BASE_ORDERS  + (stats.total     || 0));
     animateNum('statAffiliates', stats.affiliates);
 
     const resReviews = await fetch(`${API_BASE}/api/reviews/approved`);
