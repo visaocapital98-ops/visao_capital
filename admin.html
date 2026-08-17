@@ -594,6 +594,7 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
         <a href="javascript:void(0)" onclick="showAdminTab('adm-finances')" id="adm-menu-finances"><span class="icon">💰</span> Finanças</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-traffic')" id="adm-menu-traffic"><span class="icon">📈</span> Visitas e Tráfego</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-affiliates')" id="adm-menu-affiliates"><span class="icon">🤝</span> Afiliados</a>
+        <a href="javascript:void(0)" onclick="showAdminTab('adm-produtos')" id="adm-menu-produtos"><span class="icon">📦</span> Produtos</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-reviews')" id="adm-menu-reviews"><span class="icon">⭐</span> Avaliações</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-services')" id="adm-menu-services"><span class="icon">🛠️</span> Serviços</a>
         <a href="javascript:void(0)" onclick="showAdminTab('adm-settings')" id="adm-menu-settings"><span class="icon">⚙️</span> Configurações</a>
@@ -680,6 +681,12 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
       </div>
 
       <!-- AFFILIATES -->
+      <!-- PRODUTOS -->
+      <div class="tab-panel" id="adm-produtos">
+        <div class="panel-header"><h2>📦 Catálogo de Produtos</h2><p>Links directos para o formulário de encomenda de cada serviço</p></div>
+        <div id="adm_produtos_grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;"></div>
+      </div>
+
       <div class="tab-panel" id="adm-affiliates">
         <div class="panel-header"><h2>Gestão de Afiliados</h2><p>Visualize e gerencie todos os afiliados</p></div>
         <div class="search-bar">
@@ -1046,6 +1053,7 @@ function showAdminTab(tab) {
   if (tab === 'adm-affiliates') renderAffiliates();
   if (tab === 'adm-reviews') renderAdminReviews();
   if (tab === 'adm-services') renderAdminServices();
+  if (tab === 'adm-produtos') renderAdminProducts();
   if (tab === 'adm-finances') renderFinances();
   if (tab === 'adm-settings') {
     loadSettingsForm();
@@ -1710,6 +1718,62 @@ async function deleteReview(id) {
   } catch (e) {
     showToast('Erro ao eliminar avaliação', 'error');
   }
+}
+
+// ==============================
+// ADMIN PRODUTOS
+// ==============================
+const FRONTEND_BASE = 'https://visao-capital.vercel.app';
+
+async function renderAdminProducts() {
+  const grid = document.getElementById('adm_produtos_grid');
+  if (!grid) return;
+  grid.innerHTML = '<p style="color:var(--cinza);padding:20px;">A carregar produtos...</p>';
+  try {
+    const res = await fetch(`${API_BASE}/api/services`);
+    const svs = await res.json();
+    if (!svs.length) {
+      grid.innerHTML = '<p style="color:var(--cinza);padding:20px;">Nenhum produto disponível.</p>';
+      return;
+    }
+    grid.innerHTML = svs.map(s => {
+      const link = `${FRONTEND_BASE}/?service=${encodeURIComponent(s.id)}`;
+      return `
+        <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,100,0,0.08);padding:24px;display:flex;flex-direction:column;gap:12px;border:2px solid transparent;transition:.3s;" onmouseover="this.style.borderColor='var(--verde-claro)'" onmouseout="this.style.borderColor='transparent'">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--verde-escuro),var(--verde-claro));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">${s.icon}</div>
+            <div>
+              <div style="font-weight:800;font-size:1rem;color:var(--verde-escuro);">${s.name}</div>
+              <div style="font-weight:700;color:var(--verde-claro);font-size:1rem;">${s.price} Kz</div>
+            </div>
+          </div>
+          <p style="color:#666;font-size:.88rem;line-height:1.5;flex:1;">${s.description || s.desc || ''}</p>
+          <div style="border-top:1px solid #f0f0f0;padding-top:12px;">
+            <div style="font-size:.78rem;color:#999;margin-bottom:8px;">🔗 Link de Encomenda:</div>
+            <div style="background:#f4fbf7;border:1px solid #c3e6c3;border-radius:6px;padding:8px 10px;font-family:monospace;font-size:.72rem;color:#2c6e3a;word-break:break-all;margin-bottom:10px;">${link}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <a href="${link}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--verde-escuro);color:#fff;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;transition:.2s;" onmouseover="this.style.background='var(--verde-claro)';this.style.color='#000'" onmouseout="this.style.background='var(--verde-escuro)';this.style.color='#fff'">
+                🛒 Abrir Formulário
+              </a>
+              <button onclick="copyProductLink('${link}')" style="display:inline-flex;align-items:center;gap:6px;background:#e8f5e9;color:var(--verde-escuro);border:1px solid #c3e6c3;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:.2s;" onmouseover="this.style.background='#c3e6c3'" onmouseout="this.style.background='#e8f5e9'">
+                📋 Copiar Link
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    grid.innerHTML = '<p style="color:#dc3545;padding:20px;">Erro ao carregar produtos.</p>';
+  }
+}
+
+function copyProductLink(link) {
+  navigator.clipboard.writeText(link).then(() => {
+    showToast('Link copiado!', 'success');
+  }).catch(() => {
+    showToast('Erro ao copiar link', 'error');
+  });
 }
 
 // ==============================
