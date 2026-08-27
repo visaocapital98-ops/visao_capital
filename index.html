@@ -1225,10 +1225,11 @@ let currentAffiliate = null;
 // ==============================
 async function initDefaults() {
   try {
-    const resServ = await fetch(`${API_BASE}/api/services`);
+    const [resServ, resSett] = await Promise.all([
+      fetch(`${API_BASE}/api/services`),
+      fetch(`${API_BASE}/api/settings`)
+    ]);
     cachedServices = await resServ.json();
-    
-    const resSett = await fetch(`${API_BASE}/api/settings`);
     cachedSettings = await resSett.json();
   } catch (e) {
     console.error("Erro ao carregar dados iniciais:", e);
@@ -1756,8 +1757,12 @@ async function submitOrder(sid, sname, sprice) {
 async function renderHomeStats() {
   renderServicesGrid();
   try {
-    const resStats = await fetch(`${API_BASE}/api/stats/public`);
+    const [resStats, resReviews] = await Promise.all([
+      fetch(`${API_BASE}/api/stats/public`),
+      fetch(`${API_BASE}/api/reviews/approved`)
+    ]);
     const stats = await resStats.json();
+    const reviews = await resReviews.json();
     
     const BASE_CLIENTS = 219;
     const BASE_ORDERS  = 405;
@@ -1765,9 +1770,6 @@ async function renderHomeStats() {
     animateNum('statClients', BASE_CLIENTS + (stats.completed || 0));
     animateNum('statOrders',  BASE_ORDERS  + (stats.total     || 0));
     animateNum('statAffiliates', stats.affiliates);
-
-    const resReviews = await fetch(`${API_BASE}/api/reviews/approved`);
-    const reviews = await resReviews.json();
 
     const grid = document.getElementById('publicReviewsGrid');
     if (grid) {
