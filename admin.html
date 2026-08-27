@@ -661,11 +661,15 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
         </div>
         <div class="admin-section" style="margin-top:20px;">
           <h3>Registar Saída Financeira</h3>
-          <div class="form-row">
-            <div class="form-group"><label>Descrição</label><input type="text" id="expense_desc" placeholder="Ex: Material de escritório"/></div>
-            <div class="form-group"><label>Valor (Kz)</label><input type="number" id="expense_val" placeholder="Valor"/></div>
+          <p style="color:var(--cinza);font-size:.88rem;margin-bottom:16px;">Selecione o tipo de saída antes de registar:</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+            <button onclick="openExpenseModal('despesa')" style="display:inline-flex;align-items:center;gap:8px;background:#fff3cd;color:#856404;border:2px solid #ffc107;border-radius:10px;padding:12px 20px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;" onmouseover="this.style.background='#ffc107';this.style.color='#000'" onmouseout="this.style.background='#fff3cd';this.style.color='#856404'">
+              💸 Registar Despesa Geral
+            </button>
+            <button onclick="openExpenseModal('comissao')" style="display:inline-flex;align-items:center;gap:8px;background:#f8d7da;color:#721c24;border:2px solid #dc3545;border-radius:10px;padding:12px 20px;font-weight:700;font-size:.9rem;cursor:pointer;transition:.2s;" onmouseover="this.style.background='#dc3545';this.style.color='#fff'" onmouseout="this.style.background='#f8d7da';this.style.color='#721c24'">
+              🤝 Registar Comissão Paga
+            </button>
           </div>
-          <button onclick="addExpense()" class="submit-btn" style="max-width:200px;">+ Registar Saída</button>
         </div>
         <div class="table-container" style="margin-top:20px;">
           <div class="table-header"><h3>Transações</h3></div>
@@ -1927,13 +1931,24 @@ async function renderFinances() {
 
     // Transactions list
     const txns = data.transactions;
-    document.getElementById('fin_transactions').innerHTML = txns.map(t => `
-      <tr>
+    document.getElementById('fin_transactions').innerHTML = txns.map(t => {
+      let badge, color;
+      if (t.tipo === 'entrada') {
+        badge = '<span class="badge badge-green">Entrada</span>';
+        color = 'var(--verde-escuro)';
+      } else if (t.expense_type === 'comissao') {
+        badge = '<span class="badge badge-red">Comissão Paga</span>';
+        color = '#dc3545';
+      } else {
+        badge = '<span class="badge badge-yellow">Despesa Geral</span>';
+        color = '#856404';
+      }
+      return `<tr>
         <td>${new Date(t.date).toLocaleDateString('pt-PT')}</td><td>${t.desc}</td>
-        <td>${t.tipo === 'entrada' ? '<span class="badge badge-green">Entrada</span>' : '<span class="badge badge-red">Saída</span>'}</td>
-        <td><strong style="color:${t.tipo === 'entrada' ? 'var(--verde-escuro)' : '#dc3545'};">${t.tipo === 'entrada' ? '+' : '-'}${fmt(t.val)} Kz</strong></td>
-      </tr>
-    `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--cinza);padding:20px;">Sem transações registadas</td></tr>';
+        <td>${badge}</td>
+        <td><strong style="color:${color};">${t.tipo === 'entrada' ? '+' : '-'}${fmt(t.val)} Kz</strong></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--cinza);padding:20px;">Sem transações registadas</td></tr>';
 
     // Withdraw requests
     const wr = data.withdrawals;
@@ -1958,26 +1973,43 @@ async function renderFinances() {
   }
 }
 
-async function addExpense() {
-  const desc = document.getElementById('expense_desc').value.trim();
-  const val = parseFloat(document.getElementById('expense_val').value);
-  if (!desc || !val) { showToast('Preencha a descrição e o valor', 'error'); return; }
+async function openExpenseModal(tipo) {
+  const isCom = tipo === 'comissao';
+  const title = isCom ? '🤝 Registar Comissão Paga' : '💸 Registar Despesa Geral';
+  const placeholder = isCom ? 'Ex: Comissão paga ao afiliado João Silva' : 'Ex: Material de escritório, internet...';
+  const color = isCom ? '#dc3545' : '#856404';
+  const bg = isCom ? '#f8d7da' : '#fff3cd';
+
+  openModal(`
+    <h3 style="color:${color};">${title}</h3>
+    <div class="form-group" style="margin-top:16px;"><label>Descrição</label><input type="text" id="exp_modal_desc" placeholder="${placeholder}" style="border-color:${color};"/></div>
+    <div class="form-group"><label>Valor (Kz)</label><input type="number" id="exp_modal_val" placeholder="0" min="0" style="border-color:${color};"/></div>
+    <div style="background:${bg};border-radius:8px;padding:10px 14px;font-size:.85rem;color:${color};margin:8px 0 16px 0;">
+      <strong>Tipo:</strong> ${isCom ? 'Comissão Paga (será marcada a vermelho na tabela)' : 'Despesa Geral (será marcada a amarelo na tabela)'}
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" style="background:${color};" onclick="addExpenseWithType('${tipo}')">💾 Registar</button>
+    </div>
+  `);
+}
+
+async function addExpenseWithType(tipo) {
+  const desc = document.getElementById('exp_modal_desc').value.trim();
+  const val = parseFloat(document.getElementById('exp_modal_val').value);
+  if (!desc || !val || val <= 0) { showToast('Preencha a descrição e o valor', 'error'); return; }
 
   try {
     const res = await adminFetch(`${API_BASE}/api/admin/expenses`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...Auth.getHeaders(true)
-      },
-      body: JSON.stringify({ description: desc, val })
+      headers: { 'Content-Type': 'application/json', ...Auth.getHeaders(true) },
+      body: JSON.stringify({ description: desc, val, expense_type: tipo })
     });
     const data = await res.json();
     if (data.error) { showToast(data.error, 'error'); return; }
 
-    document.getElementById('expense_desc').value = '';
-    document.getElementById('expense_val').value = '';
-    showToast('Saída registada!', 'success');
+    closeModal();
+    showToast('Saída registada com sucesso!', 'success');
     renderFinances();
   } catch (e) {
     showToast('Erro ao registar despesa', 'error');
