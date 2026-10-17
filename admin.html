@@ -687,8 +687,32 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
       <!-- AFFILIATES -->
       <!-- PRODUTOS -->
       <div class="tab-panel" id="adm-produtos">
-        <div class="panel-header"><h2>📦 Catálogo de Produtos</h2><p>Links directos para o formulário de encomenda de cada serviço</p></div>
-        <div id="adm_produtos_grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;"></div>
+        <div class="panel-header"><h2>📦 Catálogo & Estatísticas de Produtos</h2><p>Estatísticas de visualizações dos formulários, compras realizadas e links directos</p></div>
+        
+        <div class="stats-grid" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="icon">👁️</div>
+            <div class="val" id="prod_stat_views">0</div>
+            <div class="lbl">Visualizações de Formulários</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">🛍️</div>
+            <div class="val" id="prod_stat_purchases" style="color:var(--verde-escuro);">0</div>
+            <div class="lbl">Compras Concluídas</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">📋</div>
+            <div class="val" id="prod_stat_orders">0</div>
+            <div class="lbl">Total de Pedidos Gerados</div>
+          </div>
+          <div class="stat-card">
+            <div class="icon">📈</div>
+            <div class="val" id="prod_stat_conversion" style="color:var(--verde-claro);">0%</div>
+            <div class="lbl">Taxa de Conversão Média</div>
+          </div>
+        </div>
+
+        <div id="adm_produtos_grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;"></div>
       </div>
 
       <div class="tab-panel" id="adm-affiliates">
@@ -1732,34 +1756,75 @@ const FRONTEND_BASE = 'https://visaocapital.online';
 async function renderAdminProducts() {
   const grid = document.getElementById('adm_produtos_grid');
   if (!grid) return;
-  grid.innerHTML = '<p style="color:var(--cinza);padding:20px;">A carregar produtos...</p>';
+  grid.innerHTML = '<p style="color:var(--cinza);padding:20px;">A carregar produtos e estatísticas...</p>';
+
   try {
-    const res = await fetch(`${API_BASE}/api/services`);
-    const svs = await res.json();
-    if (!svs.length) {
+    const res = await adminFetch(`${API_BASE}/api/admin/products/stats`, {
+      headers: Auth.getHeaders(true)
+    });
+    
+    if (res.status === 401) { logoutAdmin(); return; }
+    const data = await res.json();
+
+    if (data.summary) {
+      document.getElementById('prod_stat_views').textContent = data.summary.totalViews || 0;
+      document.getElementById('prod_stat_purchases').textContent = data.summary.totalPurchases || 0;
+      document.getElementById('prod_stat_orders').textContent = data.summary.totalOrders || 0;
+      document.getElementById('prod_stat_conversion').textContent = (data.summary.avgConversionRate || 0) + '%';
+    }
+
+    const prods = data.products || [];
+    if (!prods.length) {
       grid.innerHTML = '<p style="color:var(--cinza);padding:20px;">Nenhum produto disponível.</p>';
       return;
     }
-    grid.innerHTML = svs.map(s => {
+
+    grid.innerHTML = prods.map(s => {
       const link = `${FRONTEND_BASE}/?service=${encodeURIComponent(s.id)}`;
+      const convRate = s.conversionRate || 0;
+      const convBadgeClass = convRate >= 10 ? 'badge-green' : (convRate > 0 ? 'badge-blue' : 'badge-gray');
+
       return `
-        <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,100,0,0.08);padding:24px;display:flex;flex-direction:column;gap:12px;border:2px solid transparent;transition:.3s;" onmouseover="this.style.borderColor='var(--verde-claro)'" onmouseout="this.style.borderColor='transparent'">
+        <div style="background:#fff;border-radius:12px;box-shadow:0 4px 16px rgba(0,100,0,0.08);padding:22px;display:flex;flex-direction:column;gap:12px;border:2px solid transparent;transition:.3s;" onmouseover="this.style.borderColor='var(--verde-claro)'" onmouseout="this.style.borderColor='transparent'">
           <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--verde-escuro),var(--verde-claro));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">${s.icon}</div>
-            <div>
-              <div style="font-weight:800;font-size:1rem;color:var(--verde-escuro);">${s.name}</div>
-              <div style="font-weight:700;color:var(--verde-claro);font-size:1rem;">${s.price} Kz</div>
+            <div style="width:50px;height:50px;background:linear-gradient(135deg,var(--verde-escuro),var(--verde-claro));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">${s.icon}</div>
+            <div style="flex:1;">
+              <div style="font-weight:800;font-size:1.05rem;color:var(--verde-escuro);">${s.name}</div>
+              <div style="font-weight:700;color:var(--verde-claro);font-size:0.95rem;">${s.price} Kz</div>
             </div>
           </div>
-          <p style="color:#666;font-size:.88rem;line-height:1.5;flex:1;">${s.description || s.desc || ''}</p>
-          <div style="border-top:1px solid #f0f0f0;padding-top:12px;">
-            <div style="font-size:.78rem;color:#999;margin-bottom:8px;">🔗 Link de Encomenda:</div>
-            <div style="background:#f4fbf7;border:1px solid #c3e6c3;border-radius:6px;padding:8px 10px;font-family:monospace;font-size:.72rem;color:#2c6e3a;word-break:break-all;margin-bottom:10px;">${link}</div>
+
+          <p style="color:#666;font-size:.85rem;line-height:1.4;margin:0;">${s.description || ''}</p>
+
+          <!-- ESTATÍSTICAS DO PRODUTO -->
+          <div style="background:#f8fbf9;border:1px solid #dcefe1;border-radius:10px;padding:12px;">
+            <div style="font-size:.78rem;font-weight:700;color:var(--verde-escuro);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+              <span>📊 Desempenho do Formulário</span>
+              <span class="badge ${convBadgeClass}" style="font-size:.72rem;">${convRate}% Conversão</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div style="background:#fff;border:1px solid #e5eee7;border-radius:8px;padding:8px;text-align:center;">
+                <div style="font-size:.7rem;color:var(--cinza);margin-bottom:2px;">👁️ Visualizações</div>
+                <div style="font-weight:800;font-size:1.15rem;color:#2c3e50;">${s.views || 0}</div>
+                <div style="font-size:.65rem;color:#888;">${s.uniqueViews || 0} visitantes</div>
+              </div>
+              <div style="background:#fff;border:1px solid #e5eee7;border-radius:8px;padding:8px;text-align:center;">
+                <div style="font-size:.7rem;color:var(--cinza);margin-bottom:2px;">🛍️ Compras (Pagas)</div>
+                <div style="font-weight:800;font-size:1.15rem;color:var(--verde-escuro);">${s.purchases || 0}</div>
+                <div style="font-size:.65rem;color:#888;">de ${s.orders || 0} pedidos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LINK DIRETO DO FORMULÁRIO -->
+          <div style="border-top:1px solid #f0f0f0;padding-top:10px;">
+            <div style="font-size:.75rem;color:#888;margin-bottom:6px;">🔗 Link directo do formulário:</div>
+            <div style="background:#f4fbf7;border:1px solid #c3e6c3;border-radius:6px;padding:7px 10px;font-family:monospace;font-size:.72rem;color:#2c6e3a;word-break:break-all;margin-bottom:10px;">${link}</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <a href="${link}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--verde-escuro);color:#fff;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:600;text-decoration:none;transition:.2s;" onmouseover="this.style.background='var(--verde-claro)';this.style.color='#000'" onmouseout="this.style.background='var(--verde-escuro)';this.style.color='#fff'">
+              <a href="${link}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--verde-escuro);color:#fff;padding:8px 14px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;transition:.2s;" onmouseover="this.style.background='var(--verde-claro)';this.style.color='#000'" onmouseout="this.style.background='var(--verde-escuro)';this.style.color='#fff'">
                 🛒 Abrir Formulário
               </a>
-              <button onclick="copyProductLink('${link}')" style="display:inline-flex;align-items:center;gap:6px;background:#e8f5e9;color:var(--verde-escuro);border:1px solid #c3e6c3;padding:8px 14px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:.2s;" onmouseover="this.style.background='#c3e6c3'" onmouseout="this.style.background='#e8f5e9'">
+              <button onclick="copyProductLink('${link}')" style="display:inline-flex;align-items:center;gap:6px;background:#e8f5e9;color:var(--verde-escuro);border:1px solid #c3e6c3;padding:8px 14px;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;" onmouseover="this.style.background='#c3e6c3'" onmouseout="this.style.background='#e8f5e9'">
                 📋 Copiar Link
               </button>
             </div>
@@ -1768,7 +1833,7 @@ async function renderAdminProducts() {
       `;
     }).join('');
   } catch(e) {
-    grid.innerHTML = '<p style="color:#dc3545;padding:20px;">Erro ao carregar produtos.</p>';
+    grid.innerHTML = '<p style="color:#dc3545;padding:20px;">Erro ao carregar produtos e estatísticas.</p>';
   }
 }
 

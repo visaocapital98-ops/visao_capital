@@ -1295,6 +1295,16 @@ function openServiceForm(serviceId) {
   showPage('request');
   const card = document.getElementById('requestFormCard');
   card.innerHTML = buildForm(s);
+
+  // Registar visualização do formulário deste produto
+  try {
+    const vId = (typeof visitorId !== 'undefined' && visitorId) ? visitorId : (localStorage.getItem('vc_visitor_id') || '');
+    fetch(`${API_BASE}/api/services/${encodeURIComponent(serviceId)}/view`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visitor_id: vId })
+    }).catch(() => {});
+  } catch (err) {}
 }
 
 function buildForm(s) {
