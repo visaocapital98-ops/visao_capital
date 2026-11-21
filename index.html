@@ -1328,9 +1328,15 @@ function openServiceForm(serviceId) {
   } catch (err) {}
 }
 
+const EXTERNAL_PAYMENT_LINKS = {
+  'trabalho_escolar': 'https://pay.kursinha.com/c/6b018e673496005732d4a2ec'
+};
+
 function buildForm(s) {
   const settings = cachedSettings;
   let fieldsHTML = buildFields(s.fields);
+  const isExternalPayment = EXTERNAL_PAYMENT_LINKS && !!EXTERNAL_PAYMENT_LINKS[s.id];
+
   return `
     <h2>${s.icon} ${s.name}</h2>
     <p class="subtitle">Preencha os dados abaixo para solicitar o serviço</p>
@@ -1346,9 +1352,14 @@ function buildForm(s) {
         <input type="text" id="f_cliente_tel" placeholder="Telefone ou email"/>
       </div>
       ${fieldsHTML}
-      <button class="submit-btn" type="button" onclick="goToStep2()" style="margin-top:20px;">Seguinte ➔</button>
+      ${isExternalPayment ? `
+        <button class="submit-btn" type="button" id="btn_step1_next" onclick="handleExternalPaymentStep('${s.id}', '${s.name}', '${s.price}')" style="margin-top:20px;">Seguinte ➔</button>
+      ` : `
+        <button class="submit-btn" type="button" onclick="goToStep2()" style="margin-top:20px;">Seguinte ➔</button>
+      `}
     </div>
 
+    ${isExternalPayment ? '' : `
     <!-- ETAPA 2: PAGAMENTO E COMPROVATIVO -->
     <div id="step-2-payment" style="display:none;">
       <div class="payment-info">
@@ -1443,6 +1454,7 @@ function buildForm(s) {
         <button class="submit-btn" type="button" onclick="confirmAndSubmit('${s.id}','${s.name}','${s.price}')" style="margin:0; flex:2;">🏁 Concluir Pedido</button>
       </div>
     </div>
+    `}
 
     <input type="hidden" id="f_service_id" value="${s.id}"/>
     <input type="hidden" id="f_service_name" value="${s.name}"/>
@@ -1620,6 +1632,95 @@ function goToStep1() {
   document.getElementById('step-2-payment').style.display = 'none';
   document.getElementById('step-1-fields').style.display = 'block';
   document.getElementById('requestFormCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function handleExternalPaymentStep(sid, sname, sprice) {
+  if (!validateStep1()) return;
+
+  const externalUrl = EXTERNAL_PAYMENT_LINKS[sid];
+  if (!externalUrl) {
+    goToStep2();
+    return;
+  }
+
+  const btn = document.getElementById('btn_step1_next');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '⏳ A preparar pagamento...';
+    btn.style.opacity = '0.7';
+  }
+
+  // Disparar evento de InitiateCheckout do TikTok Pixel se disponível
+  try {
+    if (window.ttq && typeof window.ttq.track === 'function') {
+      window.ttq.track('InitiateCheckout', {
+        content_id: sid,
+        content_name: sname,
+        value: parseFloat((sprice || '0').toString().replace(/[^0-9]/g, '')) || 0,
+        currency: 'AOA'
+      });
+    }
+  } catch (err) {}
+
+  // Recolher dados preenchidos no formulário para salvar o pedido no painel de admin
+  try {
+    const nome = document.getElementById('f_cliente_nome')?.value?.trim() || '';
+    const tel = document.getElementById('f_cliente_tel')?.value?.trim() || '';
+    const afiliado = localStorage.getItem('vc_referrer') || '';
+    const vId = (typeof visitorId !== 'undefined' && visitorId) ? visitorId : (localStorage.getItem('vc_visitor_id') || '');
+
+    const formData = new FormData();
+    formData.append('cliente_nome', nome);
+    formData.append('cliente_tel', tel);
+    formData.append('service_id', sid);
+    formData.append('service_name', sname);
+    formData.append('valor', sprice);
+    formData.append('afiliado', afiliado);
+    formData.append('payment_method', 'kursinha');
+    formData.append('ref_transacao', 'Kursinha Checkout');
+    if (vId) formData.append('visitor_id', vId);
+
+    const formEl = document.getElementById('requestFormCard');
+    if (formEl) {
+      formEl.querySelectorAll('input[id^="f_"], select[id^="f_"], textarea[id^="f_"]').forEach(el => {
+        const key = el.id;
+        const excluir = ['f_cliente_nome','f_cliente_tel','f_comprovativo','f_files','f_afiliado',
+                         'f_certs','f_anexo','f_service_id','f_service_name','f_ref_transacao','f_confirm_details'];
+        if (!excluir.includes(key) && el.value && el.value.trim() !== '') {
+          formData.append(key, el.value.trim());
+        }
+      });
+
+      formEl.querySelectorAll('input[type="file"]').forEach(input => {
+        if (input.id !== 'f_comprovativo' && input.files.length > 0) {
+          for (let i = 0; i < input.files.length; i++) {
+            formData.append('ficheiros', input.files[i]);
+          }
+        }
+      });
+    }
+
+    // Enviar dados com timeout para nunca prender o utilizador
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+    try {
+      await fetch(`${API_BASE}/api/orders`, {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal
+      });
+    } catch (saveErr) {
+      console.warn('Envio do pedido externo em segundo plano:', saveErr);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  } catch (e) {
+    console.error('Erro ao registar detalhes do pedido antes do redirecionamento:', e);
+  }
+
+  // Redirecionar cliente diretamente para o link de pagamento Kursinha
+  window.location.href = externalUrl;
 }
 
 function confirmAndSubmit(sid, sname, sprice) {
