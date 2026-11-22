@@ -453,6 +453,31 @@ footer{background:var(--preto);color:#fff;padding:48px 24px 24px;}
 /* SOLICITAR PAGAMENTO */
 .withdraw-card{background:linear-gradient(135deg,#f0fff0,#e8f5e9);border:2px solid #c3e6c3;border-radius:var(--raio);padding:24px;margin-top:20px;}
 .withdraw-card h4{color:var(--verde-escuro);font-weight:700;margin-bottom:12px;}
+
+/* TRABALHOS ESCOLARES WIZARD STYLES */
+.te-header { text-align: center; margin-bottom: 20px; }
+.te-badge { display: inline-block; background: #e8f8f0; color: #1e824c; font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 8px; border: 1px solid #c3e6c3; }
+.te-stepper { display: flex; align-items: center; justify-content: space-between; margin: 0 auto 28px; max-width: 480px; position: relative; }
+.te-step { display: flex; flex-direction: column; align-items: center; z-index: 2; position: relative; }
+.te-step-num { width: 34px; height: 34px; border-radius: 50%; background: #f0f0f0; color: #777; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; transition: all 0.3s ease; border: 2px solid #ddd; }
+.te-step.active .te-step-num { background: #2ecc71; color: #fff; border-color: #27ae60; box-shadow: 0 4px 10px rgba(46,204,113,0.3); }
+.te-step.completed .te-step-num { background: #1b5e20; color: #fff; border-color: #1b5e20; }
+.te-step-text { font-size: 0.78rem; font-weight: 600; color: #666; margin-top: 6px; text-align: center; }
+.te-step.active .te-step-text { color: #1b5e20; font-weight: 700; }
+.te-step-line { flex: 1; height: 3px; background: #e0e0e0; margin: 0 8px 18px 8px; z-index: 1; transition: background 0.3s ease; }
+.te-step-line.active { background: #2ecc71; }
+.te-file-item { display: flex; align-items: center; justify-content: space-between; background: #fdfdfd; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; margin-top: 8px; font-size: 0.85rem; }
+.te-file-info { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+.te-file-name { font-weight: 600; color: #2d3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+.te-file-size { font-size: 0.75rem; color: #718096; }
+.te-file-remove { background: #fed7d7; color: #c53030; border: none; border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.te-file-remove:hover { background: #feb2b2; }
+.te-review-card { background: #f9fbf9; border: 1px solid #d4edda; border-radius: 12px; padding: 18px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
+.te-review-section { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px dashed #e2e8f0; }
+.te-review-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.te-review-title { font-size: 0.82rem; font-weight: 700; color: #1b5e20; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.te-review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 0.88rem; color: #333; }
+.te-review-item strong { color: #1a202c; }
 </style>
 </head>
 <body>
@@ -1332,7 +1357,173 @@ const EXTERNAL_PAYMENT_LINKS = {
   'trabalho_escolar': 'https://pay.kursinha.com/c/6b018e673496005732d4a2ec'
 };
 
+let teAttachedFiles = [];
+
+function buildTrabalhoEscolarForm(s) {
+  teAttachedFiles = []; // Reiniciar anexos ao abrir novo formulário
+  return `
+    <div class="te-header">
+      <span class="te-badge">📚 Serviço de Apoio Escolar</span>
+      <h2>📝 ${s.name}</h2>
+      <p class="subtitle" style="margin-bottom:20px;">Preencha a sua solicitação em 3 etapas simples para iniciarmos o seu trabalho</p>
+    </div>
+
+    <!-- STEPPER PROGRESS BAR -->
+    <div class="te-stepper">
+      <div class="te-step active" id="te-step-1">
+        <div class="te-step-num">1</div>
+        <div class="te-step-text">Seus Dados</div>
+      </div>
+      <div class="te-step-line" id="te-line-1"></div>
+      <div class="te-step" id="te-step-2">
+        <div class="te-step-num">2</div>
+        <div class="te-step-text">Trabalho</div>
+      </div>
+      <div class="te-step-line" id="te-line-2"></div>
+      <div class="te-step" id="te-step-3">
+        <div class="te-step-num">3</div>
+        <div class="te-step-text">Revisão</div>
+      </div>
+    </div>
+
+    <!-- ETAPA 1: DADOS DO CLIENTE -->
+    <div id="te-stage-1" class="te-stage-block">
+      <div style="background:#f4fbf7;border:1px solid #c3e6c3;border-radius:10px;padding:12px;margin-bottom:18px;">
+        <span style="font-size:0.85rem;color:#1e824c;font-weight:600;">👤 Passo 1: Identificação para envio e acompanhamento do trabalho escolar.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Nome Completo *</label>
+        <input type="text" id="f_cliente_nome" placeholder="Seu nome completo" required />
+      </div>
+
+      <div class="form-group">
+        <label>Contacto WhatsApp *</label>
+        <input type="tel" id="f_cliente_tel" placeholder="Ex: 923 456 789 ou 959 519 835" required />
+        <p style="font-size:0.78rem;color:var(--cinza);margin-top:4px;">Utilizaremos este número para enviar o trabalho concluído e esclarecer dúvidas.</p>
+      </div>
+
+      <div class="form-group">
+        <label>E-mail (Opcional)</label>
+        <input type="email" id="f_cliente_email" placeholder="seu@email.com (para receber cópia em PDF/Word)" />
+      </div>
+
+      <button class="submit-btn" type="button" onclick="teGoToStage(2)" style="margin-top:20px;">
+        Avançar para Detalhes do Trabalho ➔
+      </button>
+    </div>
+
+    <!-- ETAPA 2: INFORMAÇÕES DO TRABALHO -->
+    <div id="te-stage-2" class="te-stage-block" style="display:none;">
+      <div style="background:#f4fbf7;border:1px solid #c3e6c3;border-radius:10px;padding:12px;margin-bottom:18px;">
+        <span style="font-size:0.85rem;color:#1e824c;font-weight:600;">📖 Passo 2: Diga-nos exatamente os requisitos do seu trabalho escolar.</span>
+      </div>
+
+      <div class="form-group">
+        <label>Tema ou Título do Trabalho *</label>
+        <input type="text" id="f_tema" placeholder="Ex: A Importância dos Recursos Naturais em Angola" required />
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Disciplina / Cadeira *</label>
+          <input type="text" id="f_disciplina" placeholder="Ex: Geografia, História, Biologia..." required />
+        </div>
+        <div class="form-group">
+          <label>Classe / Ano *</label>
+          <select id="f_classe" required>
+            <option value="">Selecione a classe...</option>
+            <option>7ª Classe</option>
+            <option>8ª Classe</option>
+            <option>9ª Classe</option>
+            <option>10ª Classe</option>
+            <option>11ª Classe</option>
+            <option>12ª Classe</option>
+            <option>13ª Classe</option>
+            <option>Ensino Superior / Universitário</option>
+            <option>Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Tipo de Trabalho</label>
+          <select id="f_tipo_trabalho_escolar">
+            <option value="">Selecione o tipo (opcional)...</option>
+            <option>Pesquisa Escolar</option>
+            <option>Resumo / Ficha de Leitura</option>
+            <option>Trabalho Individual</option>
+            <option>Trabalho de Grupo</option>
+            <option>Composição / Redação</option>
+            <option>Relatório Escolar</option>
+            <option>Apresentação / Slides</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nº de Páginas Estimado</label>
+          <input type="number" id="f_paginas" placeholder="Ex: 5 a 15 páginas" min="1" />
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Prazo de Entrega *</label>
+          <input type="date" id="f_prazo" required />
+        </div>
+        <div class="form-group">
+          <label>Nome do Professor / Docente</label>
+          <input type="text" id="f_professor" placeholder="Ex: Prof. António Silva (opcional)" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Instruções Específicas / Requisitos</label>
+        <textarea id="f_instrucoes" placeholder="Descreva os tópicos obrigatórios, estrutura do trabalho, normas pretendidas ou orientações dadas pelo professor..." style="min-height:90px;"></textarea>
+      </div>
+
+      <!-- UPLOAD INTELIGENTE DE MATERIAIS DE APOIO -->
+      <div class="form-group">
+        <label>Documentos, Orientações ou Materiais de Apoio (Opcional)</label>
+        <div class="upload-area" onclick="document.getElementById('f_trabalho_files').click()" style="cursor:pointer;border:2px dashed #2ecc71;border-radius:10px;padding:20px;text-align:center;background:#fcfefd;">
+          <div style="font-size:2rem;margin-bottom:6px;">📎</div>
+          <p style="font-size:0.95rem;font-weight:700;color:var(--escuro);margin-bottom:4px;">Clique para anexar orientações ou fotos</p>
+          <p style="font-size:0.8rem;color:var(--cinza);">Formatos: PDF, Word (.doc, .docx), PowerPoint (.ppt, .pptx), Imagens (JPG, PNG) – Máx 15MB cada</p>
+          <input type="file" id="f_trabalho_files" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.txt" onchange="teHandleFilesSelected(this)" style="display:none;" />
+        </div>
+        <div id="te_files_list" style="margin-top:10px;"></div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button class="submit-btn" type="button" onclick="teGoToStage(1)" style="background:#e0e0e0;color:#333;margin:0;flex:1;">← Voltar aos Dados</button>
+        <button class="submit-btn" type="button" onclick="teGoToStage(3)" style="margin:0;flex:2;">Rever Solicitação ➔</button>
+      </div>
+    </div>
+
+    <!-- ETAPA 3: REVISÃO DA SOLICITAÇÃO -->
+    <div id="te-stage-3" class="te-stage-block" style="display:none;">
+      <div style="background:#f4fbf7;border:1px solid #c3e6c3;border-radius:10px;padding:12px;margin-bottom:18px;">
+        <span style="font-size:0.85rem;color:#1e824c;font-weight:600;">📋 Passo 3: Confirme os dados antes de submeter a sua solicitação.</span>
+      </div>
+
+      <div id="te-review-content"></div>
+
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button class="submit-btn" type="button" onclick="teGoToStage(2)" style="background:#e0e0e0;color:#333;margin:0;flex:1;">✏️ Corrigir Dados</button>
+        <button class="submit-btn" type="button" id="te_submit_btn" onclick="teSubmitRequest('${s.id}', '${s.name}', '${s.price}')" style="margin:0;flex:2;background:#2ecc71;color:#fff;">Enviar solicitação e continuar ➔</button>
+      </div>
+    </div>
+
+    <input type="hidden" id="f_service_id" value="${s.id}"/>
+    <input type="hidden" id="f_service_name" value="${s.name}"/>
+  `;
+}
+
 function buildForm(s) {
+  if (s.id === 'trabalho_escolar') {
+    return buildTrabalhoEscolarForm(s);
+  }
   const settings = cachedSettings;
   let fieldsHTML = buildFields(s.fields);
   const isExternalPayment = EXTERNAL_PAYMENT_LINKS && !!EXTERNAL_PAYMENT_LINKS[s.id];
@@ -1634,23 +1825,222 @@ function goToStep1() {
   document.getElementById('requestFormCard').scrollIntoView({ behavior: 'smooth' });
 }
 
-async function handleExternalPaymentStep(sid, sname, sprice) {
-  if (!validateStep1()) return;
+function teGoToStage(stage) {
+  if (stage === 2) {
+    const nome = document.getElementById('f_cliente_nome')?.value?.trim();
+    const tel = document.getElementById('f_cliente_tel')?.value?.trim();
+    if (!nome) { showToast('Por favor insira o seu nome completo', 'error'); return; }
+    if (!tel || tel.length < 6) { showToast('Por favor insira um contacto WhatsApp válido', 'error'); return; }
+  } else if (stage === 3) {
+    const tema = document.getElementById('f_tema')?.value?.trim();
+    const disc = document.getElementById('f_disciplina')?.value?.trim();
+    const classe = document.getElementById('f_classe')?.value?.trim();
+    const prazo = document.getElementById('f_prazo')?.value?.trim();
 
-  const externalUrl = EXTERNAL_PAYMENT_LINKS[sid];
-  if (!externalUrl) {
-    goToStep2();
+    if (!tema) { showToast('Por favor insira o tema ou título do trabalho', 'error'); return; }
+    if (!disc) { showToast('Por favor insira a disciplina', 'error'); return; }
+    if (!classe) { showToast('Por favor selecione a classe / nível académico', 'error'); return; }
+    if (!prazo) { showToast('Por favor selecione o prazo pretendido de entrega', 'error'); return; }
+
+    teUpdateReviewContent();
+  }
+
+  // Alternar blocos visuais
+  const s1 = document.getElementById('te-stage-1');
+  const s2 = document.getElementById('te-stage-2');
+  const s3 = document.getElementById('te-stage-3');
+  if (s1) s1.style.display = stage === 1 ? 'block' : 'none';
+  if (s2) s2.style.display = stage === 2 ? 'block' : 'none';
+  if (s3) s3.style.display = stage === 3 ? 'block' : 'none';
+
+  // Atualizar stepper
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('te-step-' + i);
+    const line = document.getElementById('te-line-' + (i - 1));
+    if (el) {
+      if (i < stage) {
+        el.className = 'te-step completed';
+      } else if (i === stage) {
+        el.className = 'te-step active';
+      } else {
+        el.className = 'te-step';
+      }
+    }
+    if (line) {
+      line.className = i <= stage ? 'te-step-line active' : 'te-step-line';
+    }
+  }
+
+  document.getElementById('requestFormCard')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function teHandleFilesSelected(input) {
+  if (!input.files || input.files.length === 0) return;
+
+  const MAX_SIZE = 15 * 1024 * 1024; // 15MB
+  for (let i = 0; i < input.files.length; i++) {
+    const file = input.files[i];
+    if (file.size > MAX_SIZE) {
+      showToast(`O ficheiro "${file.name}" excede o limite máximo de 15MB.`, 'error');
+      continue;
+    }
+    if (teAttachedFiles.length >= 10) {
+      showToast('Limite máximo de 10 ficheiros atingido.', 'error');
+      break;
+    }
+    // Evitar ficheiros com o mesmo nome e tamanho
+    const exists = teAttachedFiles.some(f => f.name === file.name && f.size === file.size);
+    if (!exists) {
+      teAttachedFiles.push(file);
+    }
+  }
+
+  input.value = ''; // Limpar input para permitir reanexar o mesmo ficheiro se for removido
+  teRenderFilesList();
+}
+
+function teRemoveFile(idx) {
+  if (idx >= 0 && idx < teAttachedFiles.length) {
+    teAttachedFiles.splice(idx, 1);
+    teRenderFilesList();
+  }
+}
+
+function teFormatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function teRenderFilesList() {
+  const container = document.getElementById('te_files_list');
+  if (!container) return;
+
+  if (teAttachedFiles.length === 0) {
+    container.innerHTML = '';
     return;
   }
 
-  const btn = document.getElementById('btn_step1_next');
+  container.innerHTML = `
+    <div style="font-size:0.8rem;font-weight:700;color:var(--escuro);margin-bottom:6px;">
+      📎 Ficheiros Anexados (${teAttachedFiles.length}/10):
+    </div>
+    ${teAttachedFiles.map((file, idx) => {
+      const isImg = file.type.startsWith('image/');
+      const icon = isImg ? '🖼️' : (file.name.endsWith('.pdf') ? '📕' : '📄');
+      return `
+        <div class="te-file-item">
+          <div class="te-file-info">
+            <span>${icon}</span>
+            <div>
+              <div class="te-file-name" title="${file.name}">${file.name}</div>
+              <div class="te-file-size">${teFormatFileSize(file.size)}</div>
+            </div>
+          </div>
+          <button type="button" class="te-file-remove" onclick="teRemoveFile(${idx})" title="Remover este ficheiro">Remover ✕</button>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function teUpdateReviewContent() {
+  const nome = document.getElementById('f_cliente_nome')?.value?.trim() || '–';
+  const tel = document.getElementById('f_cliente_tel')?.value?.trim() || '–';
+  const email = document.getElementById('f_cliente_email')?.value?.trim() || 'Não indicado';
+
+  const tema = document.getElementById('f_tema')?.value?.trim() || '–';
+  const disc = document.getElementById('f_disciplina')?.value?.trim() || '–';
+  const classe = document.getElementById('f_classe')?.value?.trim() || '–';
+  const tipo = document.getElementById('f_tipo_trabalho_escolar')?.value?.trim() || 'Padrão';
+  const paginas = document.getElementById('f_paginas')?.value?.trim() || 'Conforme necessidade';
+  const prazoVal = document.getElementById('f_prazo')?.value;
+  const prazo = prazoVal ? new Date(prazoVal + 'T00:00:00').toLocaleDateString('pt-PT') : '–';
+  const prof = document.getElementById('f_professor')?.value?.trim() || '–';
+  const instrucoes = document.getElementById('f_instrucoes')?.value?.trim() || 'Nenhuma instrução adicional indicada.';
+
+  const reviewEl = document.getElementById('te-review-content');
+  if (!reviewEl) return;
+
+  let filesHTML = '';
+  if (teAttachedFiles.length > 0) {
+    filesHTML = teAttachedFiles.map(f => `• ${f.name} (${teFormatFileSize(f.size)})`).join('<br/>');
+  } else {
+    filesHTML = '<span style="color:#888;font-style:italic;">Nenhum ficheiro anexado (pode enviar posteriormente via WhatsApp)</span>';
+  }
+
+  reviewEl.innerHTML = `
+    <div class="te-review-card">
+      <div class="te-review-section">
+        <div class="te-review-title">👤 Dados do Cliente</div>
+        <div class="te-review-grid">
+          <div class="te-review-item"><strong>Nome:</strong> ${nome}</div>
+          <div class="te-review-item"><strong>WhatsApp:</strong> ${tel}</div>
+          <div class="te-review-item"><strong>Email:</strong> ${email}</div>
+        </div>
+      </div>
+
+      <div class="te-review-section">
+        <div class="te-review-title">📖 Informações do Trabalho</div>
+        <div style="margin-bottom:8px;"><strong>Tema / Título:</strong> ${tema}</div>
+        <div class="te-review-grid">
+          <div class="te-review-item"><strong>Disciplina:</strong> ${disc}</div>
+          <div class="te-review-item"><strong>Classe / Ano:</strong> ${classe}</div>
+          <div class="te-review-item"><strong>Tipo de Trabalho:</strong> ${tipo}</div>
+          <div class="te-review-item"><strong>Páginas:</strong> ${paginas}</div>
+          <div class="te-review-item"><strong>Prazo Pretendido:</strong> <span style="color:#c0392b;font-weight:700;">${prazo}</span></div>
+          <div class="te-review-item"><strong>Professor:</strong> ${prof}</div>
+        </div>
+        <div style="margin-top:8px;background:#fff;border:1px solid #edf2f7;border-radius:6px;padding:8px 10px;font-size:0.83rem;">
+          <strong>Orientações / Instruções:</strong><br/>
+          <span style="color:#4a5568;white-space:pre-wrap;">${instrucoes}</span>
+        </div>
+      </div>
+
+      <div class="te-review-section">
+        <div class="te-review-title">📎 Ficheiros e Materiais (${teAttachedFiles.length})</div>
+        <div style="font-size:0.85rem;color:#4a5568;">${filesHTML}</div>
+      </div>
+
+      <div class="te-review-section" style="background:#eaf8ef;border-radius:8px;padding:12px;border:1px solid #c2eac9;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <span style="font-size:0.8rem;text-transform:uppercase;color:#1e824c;font-weight:700;">Valor Estimado do Serviço</span>
+            <div style="font-size:1.3rem;font-weight:800;color:#1e824c;">A partir de 1.500 Kz</div>
+          </div>
+          <div style="font-size:0.75rem;color:#555;max-width:320px;line-height:1.35;">
+            * Preço base para trabalhos escolares. O valor final e prazo são confirmados após a análise das instruções pela nossa equipa.
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function teSubmitRequest(sid, sname, sprice) {
+  const btn = document.getElementById('te_submit_btn');
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '⏳ A preparar pagamento...';
+    btn.innerHTML = '⏳ A enviar solicitação...';
     btn.style.opacity = '0.7';
   }
 
-  // Disparar evento de InitiateCheckout do TikTok Pixel se disponível
+  const nome = document.getElementById('f_cliente_nome')?.value?.trim() || '';
+  const tel = document.getElementById('f_cliente_tel')?.value?.trim() || '';
+  const email = document.getElementById('f_cliente_email')?.value?.trim() || '';
+  const tema = document.getElementById('f_tema')?.value?.trim() || '';
+  const disc = document.getElementById('f_disciplina')?.value?.trim() || '';
+  const classe = document.getElementById('f_classe')?.value?.trim() || '';
+  const tipo = document.getElementById('f_tipo_trabalho_escolar')?.value?.trim() || '';
+  const paginas = document.getElementById('f_paginas')?.value?.trim() || '';
+  const prazo = document.getElementById('f_prazo')?.value?.trim() || '';
+  const prof = document.getElementById('f_professor')?.value?.trim() || '';
+  const instrucoes = document.getElementById('f_instrucoes')?.value?.trim() || '';
+
+  const afiliado = localStorage.getItem('vc_referrer') || '';
+  const vId = (typeof visitorId !== 'undefined' && visitorId) ? visitorId : (localStorage.getItem('vc_visitor_id') || '');
+
+  // Disparar evento de InitiateCheckout do TikTok Pixel
   try {
     if (window.ttq && typeof window.ttq.track === 'function') {
       window.ttq.track('InitiateCheckout', {
@@ -1662,65 +2052,63 @@ async function handleExternalPaymentStep(sid, sname, sprice) {
     }
   } catch (err) {}
 
-  // Recolher dados preenchidos no formulário para salvar o pedido no painel de admin
-  try {
-    const nome = document.getElementById('f_cliente_nome')?.value?.trim() || '';
-    const tel = document.getElementById('f_cliente_tel')?.value?.trim() || '';
-    const afiliado = localStorage.getItem('vc_referrer') || '';
-    const vId = (typeof visitorId !== 'undefined' && visitorId) ? visitorId : (localStorage.getItem('vc_visitor_id') || '');
+  const formData = new FormData();
+  formData.append('cliente_nome', nome);
+  formData.append('cliente_tel', tel);
+  if (email) formData.append('cliente_email', email);
+  formData.append('service_id', sid);
+  formData.append('service_name', sname);
+  formData.append('valor', sprice);
+  formData.append('afiliado', afiliado);
+  formData.append('payment_method', 'kursinha');
+  formData.append('order_type', 'request');
+  formData.append('ref_transacao', 'Kursinha Checkout');
+  if (vId) formData.append('visitor_id', vId);
 
-    const formData = new FormData();
-    formData.append('cliente_nome', nome);
-    formData.append('cliente_tel', tel);
-    formData.append('service_id', sid);
-    formData.append('service_name', sname);
-    formData.append('valor', sprice);
-    formData.append('afiliado', afiliado);
-    formData.append('payment_method', 'kursinha');
-    formData.append('ref_transacao', 'Kursinha Checkout');
-    if (vId) formData.append('visitor_id', vId);
+  // Campos específicos
+  formData.append('f_tema', tema);
+  formData.append('f_disciplina', disc);
+  formData.append('f_classe', classe);
+  if (tipo) formData.append('f_tipo_trabalho_escolar', tipo);
+  if (paginas) formData.append('f_paginas', paginas);
+  if (prazo) formData.append('f_prazo', prazo);
+  if (prof) formData.append('f_professor', prof);
+  if (instrucoes) formData.append('f_instrucoes', instrucoes);
 
-    const formEl = document.getElementById('requestFormCard');
-    if (formEl) {
-      formEl.querySelectorAll('input[id^="f_"], select[id^="f_"], textarea[id^="f_"]').forEach(el => {
-        const key = el.id;
-        const excluir = ['f_cliente_nome','f_cliente_tel','f_comprovativo','f_files','f_afiliado',
-                         'f_certs','f_anexo','f_service_id','f_service_name','f_ref_transacao','f_confirm_details'];
-        if (!excluir.includes(key) && el.value && el.value.trim() !== '') {
-          formData.append(key, el.value.trim());
-        }
-      });
-
-      formEl.querySelectorAll('input[type="file"]').forEach(input => {
-        if (input.id !== 'f_comprovativo' && input.files.length > 0) {
-          for (let i = 0; i < input.files.length; i++) {
-            formData.append('ficheiros', input.files[i]);
-          }
-        }
-      });
-    }
-
-    // Enviar dados com timeout para nunca prender o utilizador
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
-
-    try {
-      await fetch(`${API_BASE}/api/orders`, {
-        method: 'POST',
-        body: formData,
-        signal: controller.signal
-      });
-    } catch (saveErr) {
-      console.warn('Envio do pedido externo em segundo plano:', saveErr);
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  } catch (e) {
-    console.error('Erro ao registar detalhes do pedido antes do redirecionamento:', e);
+  // Anexar ficheiros adicionados pelo utilizador
+  for (let i = 0; i < teAttachedFiles.length; i++) {
+    formData.append('ficheiros', teAttachedFiles[i]);
   }
 
-  // Redirecionar cliente diretamente para o link de pagamento Kursinha
-  window.location.href = externalUrl;
+  let createdOrderId = null;
+  const externalBaseUrl = EXTERNAL_PAYMENT_LINKS[sid] || 'https://pay.kursinha.com/c/6b018e673496005732d4a2ec';
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+    const res = await fetch(`${API_BASE}/api/orders`, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    const data = await res.json();
+    if (data.orderId) {
+      createdOrderId = data.orderId;
+      localStorage.setItem('vc_last_request_id', data.orderId);
+    }
+  } catch (err) {
+    console.warn('Submissão da solicitação em segundo plano:', err);
+  }
+
+  // Redirecionamento seguro para o checkout da Kursinha
+  const finalRedirectUrl = createdOrderId 
+    ? `${externalBaseUrl}?ref=${encodeURIComponent(createdOrderId)}`
+    : externalBaseUrl;
+
+  window.location.href = finalRedirectUrl;
 }
 
 function confirmAndSubmit(sid, sname, sprice) {
