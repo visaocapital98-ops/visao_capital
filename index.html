@@ -1358,11 +1358,42 @@ const EXTERNAL_PAYMENT_LINKS = {
 };
 
 let teAttachedFiles = [];
+let teCurrentMode = 'test'; // 'test' = wizard + kursinha, 'standard' = tradicional
+
+function setTEMode(mode, sid) {
+  teCurrentMode = mode;
+  openServiceForm(sid);
+}
 
 function buildTrabalhoEscolarForm(s) {
   teAttachedFiles = []; // Reiniciar anexos ao abrir novo formulário
   return `
     <div class="te-header">
+      <!-- MODO DE TESTE SELECTOR -->
+      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
+        <button type="button" onclick="setTEMode('test','${s.id}')" style="background:${teCurrentMode === 'test' ? '#7c3aed' : '#f0ebff'};color:${teCurrentMode === 'test' ? '#fff' : '#7c3aed'};border:1px solid #7c3aed;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:700;cursor:pointer;">
+          🧪 Novo Form (Modo de Teste)
+        </button>
+        <button type="button" onclick="setTEMode('standard','${s.id}')" style="background:${teCurrentMode === 'standard' ? '#2c3e50' : '#edf2f7'};color:${teCurrentMode === 'standard' ? '#fff' : '#4a5568'};border:1px solid #cbd5e0;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;cursor:pointer;">
+          📋 Formulário Tradicional
+        </button>
+      </div>
+
+      <!-- BANNER EXPLICATIVO DO MODO DE TESTE -->
+      <div style="background:linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);border:2px dashed #8b5cf6;border-radius:12px;padding:14px 18px;margin-bottom:20px;text-align:left;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+          <span style="background:#7c3aed;color:#fff;font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;">
+            🧪 MODO DE TESTE ATIVO
+          </span>
+          <span style="font-size:0.8rem;color:#6d28d9;font-weight:600;">
+            Versão Experimental • Pagamento Digital Kursinha
+          </span>
+        </div>
+        <p style="margin:0;font-size:0.84rem;color:#4c1d95;line-height:1.45;">
+          Este formulário está atualmente em <strong>modo de teste</strong>. Ao preencher as etapas e clicar em "Enviar solicitação", os seus dados serão guardados instantaneamente no nosso painel de administração e será direcionado para concluir o pagamento na <strong>Kursinha</strong>.
+        </p>
+      </div>
+
       <span class="te-badge">📚 Serviço de Apoio Escolar</span>
       <h2>📝 ${s.name}</h2>
       <p class="subtitle" style="margin-bottom:20px;">Preencha a sua solicitação em 3 etapas simples para iniciarmos o seu trabalho</p>
@@ -1521,14 +1552,27 @@ function buildTrabalhoEscolarForm(s) {
 }
 
 function buildForm(s) {
-  if (s.id === 'trabalho_escolar') {
+  if (s.id === 'trabalho_escolar' && teCurrentMode === 'test') {
     return buildTrabalhoEscolarForm(s);
   }
   const settings = cachedSettings;
   let fieldsHTML = buildFields(s.fields);
-  const isExternalPayment = EXTERNAL_PAYMENT_LINKS && !!EXTERNAL_PAYMENT_LINKS[s.id];
+  const isTrabalhoEscolar = s.id === 'trabalho_escolar';
+  const isExternalPayment = !isTrabalhoEscolar && EXTERNAL_PAYMENT_LINKS && !!EXTERNAL_PAYMENT_LINKS[s.id];
+
+  const modeSwitcherHTML = isTrabalhoEscolar ? `
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
+      <button type="button" onclick="setTEMode('test','${s.id}')" style="background:${teCurrentMode === 'test' ? '#7c3aed' : '#f0ebff'};color:${teCurrentMode === 'test' ? '#fff' : '#7c3aed'};border:1px solid #7c3aed;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:700;cursor:pointer;">
+        🧪 Novo Form (Modo de Teste)
+      </button>
+      <button type="button" onclick="setTEMode('standard','${s.id}')" style="background:${teCurrentMode === 'standard' ? '#2c3e50' : '#edf2f7'};color:${teCurrentMode === 'standard' ? '#fff' : '#4a5568'};border:1px solid #cbd5e0;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;cursor:pointer;">
+        📋 Formulário Tradicional
+      </button>
+    </div>
+  ` : '';
 
   return `
+    ${modeSwitcherHTML}
     <h2>${s.icon} ${s.name}</h2>
     <p class="subtitle">Preencha os dados abaixo para solicitar o serviço</p>
     
@@ -2021,7 +2065,7 @@ async function teSubmitRequest(sid, sname, sprice) {
   const btn = document.getElementById('te_submit_btn');
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '⏳ A enviar solicitação...';
+    btn.innerHTML = '⏳ A guardar solicitação no sistema...';
     btn.style.opacity = '0.7';
   }
 
@@ -2036,6 +2080,25 @@ async function teSubmitRequest(sid, sname, sprice) {
   const prazo = document.getElementById('f_prazo')?.value?.trim() || '';
   const prof = document.getElementById('f_professor')?.value?.trim() || '';
   const instrucoes = document.getElementById('f_instrucoes')?.value?.trim() || '';
+
+  if (!nome) { 
+    showToast('Por favor insira o seu nome completo', 'error'); 
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Enviar solicitação e continuar ➔'; btn.style.opacity = '1'; }
+    teGoToStage(1); 
+    return; 
+  }
+  if (!tel || tel.length < 6) { 
+    showToast('Por favor insira um contacto WhatsApp válido', 'error'); 
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Enviar solicitação e continuar ➔'; btn.style.opacity = '1'; }
+    teGoToStage(1); 
+    return; 
+  }
+  if (!tema) { 
+    showToast('Por favor insira o tema do trabalho', 'error'); 
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Enviar solicitação e continuar ➔'; btn.style.opacity = '1'; }
+    teGoToStage(2); 
+    return; 
+  }
 
   const afiliado = localStorage.getItem('vc_referrer') || '';
   const vId = (typeof visitorId !== 'undefined' && visitorId) ? visitorId : (localStorage.getItem('vc_visitor_id') || '');
@@ -2057,12 +2120,12 @@ async function teSubmitRequest(sid, sname, sprice) {
   formData.append('cliente_tel', tel);
   if (email) formData.append('cliente_email', email);
   formData.append('service_id', sid);
-  formData.append('service_name', sname);
-  formData.append('valor', sprice);
+  formData.append('service_name', sname || 'Trabalhos Escolares');
+  formData.append('valor', sprice || 'A partir de 1.500');
   formData.append('afiliado', afiliado);
   formData.append('payment_method', 'kursinha');
   formData.append('order_type', 'request');
-  formData.append('ref_transacao', 'Kursinha Checkout');
+  formData.append('ref_transacao', 'Kursinha Checkout (Teste)');
   if (vId) formData.append('visitor_id', vId);
 
   // Campos específicos
@@ -2080,12 +2143,14 @@ async function teSubmitRequest(sid, sname, sprice) {
     formData.append('ficheiros', teAttachedFiles[i]);
   }
 
-  let createdOrderId = null;
-  const externalBaseUrl = EXTERNAL_PAYMENT_LINKS[sid] || 'https://pay.kursinha.com/c/6b018e673496005732d4a2ec';
+  const externalBaseUrl = (typeof EXTERNAL_PAYMENT_LINKS !== 'undefined' && EXTERNAL_PAYMENT_LINKS[sid]) 
+    ? EXTERNAL_PAYMENT_LINKS[sid] 
+    : 'https://pay.kursinha.com/c/6b018e673496005732d4a2ec';
 
+  let data = null;
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout seguro para redes móveis
 
     const res = await fetch(`${API_BASE}/api/orders`, {
       method: 'POST',
@@ -2094,21 +2159,59 @@ async function teSubmitRequest(sid, sname, sprice) {
     });
     clearTimeout(timeoutId);
 
-    const data = await res.json();
-    if (data.orderId) {
-      createdOrderId = data.orderId;
-      localStorage.setItem('vc_last_request_id', data.orderId);
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Erro do servidor (${res.status})`);
     }
+
+    data = await res.json();
   } catch (err) {
-    console.warn('Submissão da solicitação em segundo plano:', err);
+    console.error('Erro na submissão da solicitação:', err);
+    showToast(err.message || 'Erro ao comunicar com o servidor. Verifique a sua ligação à internet.', 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Enviar solicitação e continuar ➔';
+      btn.style.opacity = '1';
+    }
+    return;
   }
 
-  // Redirecionamento seguro para o checkout da Kursinha
-  const finalRedirectUrl = createdOrderId 
-    ? `${externalBaseUrl}?ref=${encodeURIComponent(createdOrderId)}`
-    : externalBaseUrl;
+  const createdOrderId = (data && data.orderId) ? data.orderId : ('PD' + Date.now());
+  localStorage.setItem('vc_last_request_id', createdOrderId);
 
-  window.location.href = finalRedirectUrl;
+  const finalRedirectUrl = `${externalBaseUrl}?ref=${encodeURIComponent(createdOrderId)}`;
+
+  // Exibir confirmação explícita no ecrã antes de redirecionar
+  const card = document.getElementById('requestFormCard');
+  if (card) {
+    card.innerHTML = `
+      <div class="success-box" style="background:#f5f3ff;border:2px solid #8b5cf6;border-radius:12px;padding:28px 20px;text-align:center;">
+        <div style="font-size:3.2rem;margin-bottom:12px;">🎉</div>
+        <span style="background:#7c3aed;color:#fff;font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;">
+          🧪 Solicitação Registada com Sucesso
+        </span>
+        <h3 style="color:#4c1d95;margin:12px 0 8px 0;font-size:1.35rem;">A sua solicitação já está no Painel de Administração!</h3>
+        <p style="font-size:0.92rem;color:#333;margin-bottom:14px;line-height:1.5;">
+          O seu pedido de <strong>Trabalho Escolar</strong> foi recebido pela nossa equipa com o identificador:
+        </p>
+        <div style="background:#fff;border:2px dashed #8b5cf6;border-radius:8px;padding:12px;font-family:monospace;font-size:1.25rem;font-weight:bold;color:#7c3aed;margin:14px auto;max-width:320px;box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+          ${createdOrderId}
+        </div>
+        <div style="background:#ede9fe;border-radius:8px;padding:12px;margin:16px auto;max-width:440px;font-size:0.85rem;color:#5b21b6;line-height:1.45;">
+          ⏳ <strong>A redirecionar automaticamente para a Kursinha em 3 segundos...</strong><br/>
+          Conclua o pagamento para iniciarmos a elaboração do seu trabalho.
+        </div>
+        <a href="${finalRedirectUrl}" class="submit-btn" style="display:inline-block;max-width:340px;background:#2ecc71;color:#fff;text-decoration:none;padding:14px 24px;font-weight:700;border-radius:8px;font-size:1rem;margin-top:8px;box-shadow:0 4px 12px rgba(46,204,113,0.3);">
+          👉 Finalizar Pagamento na Kursinha ➔
+        </a>
+      </div>
+    `;
+    card.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  setTimeout(() => {
+    window.location.href = finalRedirectUrl;
+  }, 2800);
 }
 
 function confirmAndSubmit(sid, sname, sprice) {
