@@ -1358,42 +1358,11 @@ const EXTERNAL_PAYMENT_LINKS = {
 };
 
 let teAttachedFiles = [];
-let teCurrentMode = 'test'; // 'test' = wizard + kursinha, 'standard' = tradicional
-
-function setTEMode(mode, sid) {
-  teCurrentMode = mode;
-  openServiceForm(sid);
-}
 
 function buildTrabalhoEscolarForm(s) {
   teAttachedFiles = []; // Reiniciar anexos ao abrir novo formulário
   return `
     <div class="te-header">
-      <!-- MODO DE TESTE SELECTOR -->
-      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
-        <button type="button" onclick="setTEMode('test','${s.id}')" style="background:${teCurrentMode === 'test' ? '#7c3aed' : '#f0ebff'};color:${teCurrentMode === 'test' ? '#fff' : '#7c3aed'};border:1px solid #7c3aed;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:700;cursor:pointer;">
-          🧪 Novo Form (Modo de Teste)
-        </button>
-        <button type="button" onclick="setTEMode('standard','${s.id}')" style="background:${teCurrentMode === 'standard' ? '#2c3e50' : '#edf2f7'};color:${teCurrentMode === 'standard' ? '#fff' : '#4a5568'};border:1px solid #cbd5e0;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;cursor:pointer;">
-          📋 Formulário Tradicional
-        </button>
-      </div>
-
-      <!-- BANNER EXPLICATIVO DO MODO DE TESTE -->
-      <div style="background:linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);border:2px dashed #8b5cf6;border-radius:12px;padding:14px 18px;margin-bottom:20px;text-align:left;">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
-          <span style="background:#7c3aed;color:#fff;font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;">
-            🧪 MODO DE TESTE ATIVO
-          </span>
-          <span style="font-size:0.8rem;color:#6d28d9;font-weight:600;">
-            Versão Experimental • Pagamento Digital Kursinha
-          </span>
-        </div>
-        <p style="margin:0;font-size:0.84rem;color:#4c1d95;line-height:1.45;">
-          Este formulário está atualmente em <strong>modo de teste</strong>. Ao preencher as etapas e clicar em "Enviar solicitação", os seus dados serão guardados instantaneamente no nosso painel de administração e será direcionado para concluir o pagamento na <strong>Kursinha</strong>.
-        </p>
-      </div>
-
       <span class="te-badge">📚 Serviço de Apoio Escolar</span>
       <h2>📝 ${s.name}</h2>
       <p class="subtitle" style="margin-bottom:20px;">Preencha a sua solicitação em 3 etapas simples para iniciarmos o seu trabalho</p>
@@ -1552,27 +1521,14 @@ function buildTrabalhoEscolarForm(s) {
 }
 
 function buildForm(s) {
-  if (s.id === 'trabalho_escolar' && teCurrentMode === 'test') {
+  if (s.id === 'trabalho_escolar') {
     return buildTrabalhoEscolarForm(s);
   }
   const settings = cachedSettings;
   let fieldsHTML = buildFields(s.fields);
-  const isTrabalhoEscolar = s.id === 'trabalho_escolar';
-  const isExternalPayment = !isTrabalhoEscolar && EXTERNAL_PAYMENT_LINKS && !!EXTERNAL_PAYMENT_LINKS[s.id];
-
-  const modeSwitcherHTML = isTrabalhoEscolar ? `
-    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
-      <button type="button" onclick="setTEMode('test','${s.id}')" style="background:${teCurrentMode === 'test' ? '#7c3aed' : '#f0ebff'};color:${teCurrentMode === 'test' ? '#fff' : '#7c3aed'};border:1px solid #7c3aed;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:700;cursor:pointer;">
-        🧪 Novo Form (Modo de Teste)
-      </button>
-      <button type="button" onclick="setTEMode('standard','${s.id}')" style="background:${teCurrentMode === 'standard' ? '#2c3e50' : '#edf2f7'};color:${teCurrentMode === 'standard' ? '#fff' : '#4a5568'};border:1px solid #cbd5e0;padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:600;cursor:pointer;">
-        📋 Formulário Tradicional
-      </button>
-    </div>
-  ` : '';
+  const isExternalPayment = EXTERNAL_PAYMENT_LINKS && !!EXTERNAL_PAYMENT_LINKS[s.id];
 
   return `
-    ${modeSwitcherHTML}
     <h2>${s.icon} ${s.name}</h2>
     <p class="subtitle">Preencha os dados abaixo para solicitar o serviço</p>
     
@@ -2125,7 +2081,7 @@ async function teSubmitRequest(sid, sname, sprice) {
   formData.append('afiliado', afiliado);
   formData.append('payment_method', 'kursinha');
   formData.append('order_type', 'request');
-  formData.append('ref_transacao', 'Kursinha Checkout (Teste)');
+  formData.append('ref_transacao', 'Kursinha Checkout');
   if (vId) formData.append('visitor_id', vId);
 
   // Campos específicos
@@ -2187,8 +2143,8 @@ async function teSubmitRequest(sid, sname, sprice) {
     card.innerHTML = `
       <div class="success-box" style="background:#f5f3ff;border:2px solid #8b5cf6;border-radius:12px;padding:28px 20px;text-align:center;">
         <div style="font-size:3.2rem;margin-bottom:12px;">🎉</div>
-        <span style="background:#7c3aed;color:#fff;font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;">
-          🧪 Solicitação Registada com Sucesso
+        <span style="background:#27ae60;color:#fff;font-size:0.75rem;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;">
+          Solicitação Registada com Sucesso
         </span>
         <h3 style="color:#4c1d95;margin:12px 0 8px 0;font-size:1.35rem;">A sua solicitação já está no Painel de Administração!</h3>
         <p style="font-size:0.92rem;color:#333;margin-bottom:14px;line-height:1.5;">
